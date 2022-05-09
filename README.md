@@ -1,17 +1,15 @@
-# @elrondnetwork/dapp-template
-The __Elrond dApp Template__, built using [React.js](https://reactjs.org/) and [Typescript](https://www.typescriptlang.org/).
-It's a basic implementation of [@elrondnetwork/dapp-core](https://www.npmjs.com/package/@elrondnetwork/dapp-core), providing the basics for Elrond authentication and TX signing.
+# testDEX dApp
 
-See [Dapp template](https://dapp-template.elrond.com/) for live demo.
+Based on [Elrond dApp Template](https://github.com/ElrondNetwork/dapp-template), built using [React.js](https://reactjs.org/) and [Typescript](https://www.typescriptlang.org/). It's a basic implementation of [@elrondnetwork/dapp-core](https://www.npmjs.com/package/@elrondnetwork/dapp-core), providing the basics for Elrond authentication and TX signing. See [Dapp template](https://dapp-template.elrond.com/) for live demo.
 
 ## Requirements
 
-* Node.js version 12.16.2+
-* Npm version 6.14.4+
+- Node.js version 12.16.2+
+- Npm version 6.14.4+
 
 ## Getting Started
 
-The dapp is a client side only project and is built using the [Create React App](https://create-react-app.dev)  scripts.
+The dapp is a client side only project and is built using the [Create React App](https://create-react-app.dev) scripts. You can find the [smart contract also on GitHub](https://github.com/sergiogrubio/TFM_latex). Once the contract is built and deployed, update its address inside [src/config.tsx](https://github.com/sergiogrubio/TFM_dapp/blob/master/src/config.tsx).
 
 ### Instalation and running
 
@@ -54,22 +52,8 @@ To build the project run:
 npm run build
 ```
 
-## Roadmap
+Elrond dApp Template was implemented by The [Elrond Team](https://elrond.com/team/) and changed by me to implement testDEX.
 
-See the [open issues](https://github.com/ElrondNetwork/dapp-template/issues) for a list of proposed features (and known issues).
+## Getting Started
 
-## Contributing
-
-Contributions are what make the open source community such an amazing place to be learn, inspire, and create. Any contributions you make are **greatly appreciated**.
-
-One can contribute by creating _pull requests_, or by opening _issues_ for discovered bugs or desired features.
-
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-## Developers
-
-The [Elrond Team](https://elrond.com/team/).
+You can find [the document of the project also on Github](https://github.com/sergiogrubio/TFM_latex) (but I wrote it in catalan, I thinks it is the first Elrond project using this language).
