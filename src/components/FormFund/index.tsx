@@ -8,25 +8,8 @@ import {
 } from '@elrondnetwork/dapp-core';
 import { faArrowUp } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import BigNumber from 'bignumber.js';
 import { contractAddress } from 'config';
-
-// idea from:
-// https://github.com/bogdan-rosianu/elrond-converters
-const hexEncodeStr = (str: string) => Buffer.from(str, 'ascii').toString('hex');
-
-// idea from:
-// https://github.com/bogdan-rosianu/elrond-converters
-const hexEncodeNumber = (num: number) => {
-  const bn = new BigNumber(num, 10);
-  let bnStr = bn.toString(16);
-
-  if (bnStr.length % 2 != 0) {
-    bnStr = '0' + bnStr;
-  }
-
-  return bnStr;
-};
+import { hexEncodeStr, hexEncodeNumber } from '../../controllers/common';
 
 const FormFund = () => {
   const [fundData, setFundData] = useState({
