@@ -6,7 +6,9 @@ import Footer from './Footer';
 import Navbar from './Navbar';
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
-  const { search } = useLocation();
+  const { pathname, search } = useLocation();
+  const menuOpt = pathname.split('/')[1];
+  console.log(menuOpt);
   return (
     <div className='bg-light d-flex flex-column flex-fill wrapper'>
       <Navbar />

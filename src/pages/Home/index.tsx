@@ -15,7 +15,7 @@ const Home = () => {
               </h2>
 
               <p className='mb-3'>
-                This is an Elrond dapp sample.
+                This is a very simple DEX based on AMM protocol.
                 <br /> Login using your Elrond wallet.
               </p>
 

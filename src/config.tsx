@@ -1,4 +1,4 @@
 export const contractAddress =
-  'erd1qqqqqqqqqqqqqpgquvt728n40ssd8n2qns9jrlqpwq2jc4rj4cysfuj3ad';
+  'erd1qqqqqqqqqqqqqpgqv9kru8n83j240ry4fu82cgnz4mcr5m7ymq2qk0wtvk';
 
-export const dAppName = 'example Dapp';
+export const dAppName = 'testDEX';

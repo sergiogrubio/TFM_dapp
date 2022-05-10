@@ -1,5 +1,7 @@
 # testDEX dApp
 
+testDEX is a simple DEX using the Elrond network. University master's degree final project (cybersecurity/UOC).
+
 Based on [Elrond dApp Template](https://github.com/ElrondNetwork/dapp-template), built using [React.js](https://reactjs.org/) and [Typescript](https://www.typescriptlang.org/). It's a basic implementation of [@elrondnetwork/dapp-core](https://www.npmjs.com/package/@elrondnetwork/dapp-core), providing the basics for Elrond authentication and TX signing. See [Dapp template](https://dapp-template.elrond.com/) for live demo.
 
 ## Requirements
@@ -9,7 +11,7 @@ Based on [Elrond dApp Template](https://github.com/ElrondNetwork/dapp-template),
 
 ## Getting Started
 
-The dapp is a client side only project and is built using the [Create React App](https://create-react-app.dev) scripts. You can find the [smart contract also on GitHub](https://github.com/sergiogrubio/TFM_latex). Once the contract is built and deployed, update its address inside [src/config.tsx](https://github.com/sergiogrubio/TFM_dapp/blob/master/src/config.tsx).
+The dApp is a client side only project and is built using the [Create React App](https://create-react-app.dev) scripts. You can find the [smart contract also on GitHub](https://github.com/sergiogrubio/TFM_smart_contract). 
 
 ### Instalation and running
 
@@ -28,6 +30,8 @@ Valid values are `testnet`, `devnet` or `mainnet`
 
 If you need to edit the network configuration, you can pass in a `customNetworkConfig` object.
 More info about this can be found in [dapp-core documentation](https://github.com/ElrondNetwork/dapp-core)
+
+Finally, built and deploy the [smart contract](https://github.com/sergiogrubio/TFM_smart_contract), and update its address in [src/config.tsx](https://github.com/sergiogrubio/TFM_dapp/blob/master/src/config.tsx).
 
 ### Step 3. Running in development mode
 
@@ -54,6 +58,6 @@ npm run build
 
 Elrond dApp Template was implemented by The [Elrond Team](https://elrond.com/team/) and changed by me to implement testDEX.
 
-## Getting Started
+## The thesis
 
-You can find [the document of the project also on Github](https://github.com/sergiogrubio/TFM_latex) (but I wrote it in catalan, I thinks it is the first Elrond project using this language).
+You can find [the thesis of the project also on Github](https://github.com/sergiogrubio/TFM_latex) (but I wrote it in catalan, I think it is the first Elrond project using this language).

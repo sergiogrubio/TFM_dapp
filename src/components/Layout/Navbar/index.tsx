@@ -10,7 +10,19 @@ const Navbar = () => {
   const { address } = useGetAccountInfo();
 
   const handleLogout = () => {
-    logout(`${window.location.origin}/unlock`);
+    logout(`${window.location.origin}`);
+  };
+
+  const handleFund = () => {
+    logout(`${window.location.origin}/fund`);
+  };
+
+  const handleClaim = () => {
+    logout(`${window.location.origin}/claim`);
+  };
+
+  const handleTrade = () => {
+    logout(`${window.location.origin}/trade`);
   };
 
   const isLoggedIn = Boolean(address);
@@ -20,13 +32,34 @@ const Navbar = () => {
       <div className='container-fluid'>
         <Link
           className='d-flex align-items-center navbar-brand mr-0'
-          to={isLoggedIn ? routeNames.dashboard : routeNames.home}
+          to={isLoggedIn ? routeNames.trade : routeNames.home}
         >
           <ElrondLogo className='elrond-logo' />
           <span className='dapp-name text-muted'>{dAppName}</span>
         </Link>
 
         <Nav className='ml-auto'>
+          {isLoggedIn && (
+            <NavItem>
+              <button className='btn btn-link' onClick={handleFund}>
+                Fund
+              </button>
+            </NavItem>
+          )}
+          {isLoggedIn && (
+            <NavItem>
+              <button className='btn btn-link' onClick={handleClaim}>
+                Claim
+              </button>
+            </NavItem>
+          )}
+          {isLoggedIn && (
+            <NavItem>
+              <button className='btn btn-link' onClick={handleTrade}>
+                Trade
+              </button>
+            </NavItem>
+          )}
           {isLoggedIn && (
             <NavItem>
               <button className='btn btn-link' onClick={handleLogout}>

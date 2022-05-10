@@ -2,9 +2,11 @@ import React from 'react';
 import { DappUI, DappProvider } from '@elrondnetwork/dapp-core';
 import { Route, Routes, BrowserRouter as Router } from 'react-router-dom';
 import Layout from 'components/Layout';
+// import Fund from 'pages/Fund';
 import PageNotFound from 'pages/PageNotFound';
 import { routeNames } from 'routes';
 import routes from 'routes';
+
 import '@elrondnetwork/dapp-core/build/index.css';
 
 const environment = 'devnet';
@@ -15,6 +17,9 @@ const {
   NotificationModal,
   DappCorePages: { UnlockPage }
 } = DappUI;
+const referrer = document.referrer;
+const mainroute = '/' + referrer.split('/').pop();
+const defaultRoute = '/Trade';
 
 const App = () => {
   return (
@@ -31,7 +36,11 @@ const App = () => {
           <Routes>
             <Route
               path={routeNames.unlock}
-              element={<UnlockPage loginRoute={routeNames.dashboard} />}
+              element={
+                <UnlockPage
+                  loginRoute={mainroute !== '/' ? mainroute : defaultRoute}
+                />
+              }
             />
             {routes.map((route: any, index: number) => (
               <Route

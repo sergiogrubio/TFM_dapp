@@ -1,16 +1,18 @@
 import { dAppName } from 'config';
 import withPageTitle from './components/PageTitle';
-import Dashboard from './pages/Dashboard';
+import Claim from './pages/Claim';
+import Fund from './pages/Fund';
 import Home from './pages/Home';
-import Transaction from './pages/Transaction';
+import Trade from './pages/Trade';
 
 export const routeNames = {
   home: '/',
-  dashboard: '/dashboard',
-  transaction: '/transaction',
   unlock: '/unlock',
   ledger: '/ledger',
-  walletconnect: '/walletconnect'
+  walletconnect: '/walletconnect',
+  fund: '/fund',
+  claim: '/claim',
+  trade: '/trade'
 };
 
 const routes: Array<any> = [
@@ -20,15 +22,22 @@ const routes: Array<any> = [
     component: Home
   },
   {
-    path: routeNames.dashboard,
-    title: 'Dashboard',
-    component: Dashboard,
+    path: routeNames.fund,
+    title: 'Fund',
+    component: Fund,
     authenticatedRoute: true
   },
   {
-    path: routeNames.transaction,
-    title: 'Transaction',
-    component: Transaction
+    path: routeNames.claim,
+    title: 'Claim',
+    component: Claim,
+    authenticatedRoute: true
+  },
+  {
+    path: routeNames.trade,
+    title: 'Trade',
+    component: Trade,
+    authenticatedRoute: true
   }
 ];
 
