@@ -6,8 +6,13 @@ import { dAppName } from 'config';
 import { routeNames } from 'routes';
 import { ReactComponent as ElrondLogo } from './../../../assets/img/elrond.svg';
 
-const Navbar = () => {
+interface NavBarProps {
+  current: string;
+}
+
+const Navbar = (props: NavBarProps) => {
   const { address } = useGetAccountInfo();
+  const { current } = props;
 
   const handleLogout = () => {
     logout(`${window.location.origin}`);
@@ -41,21 +46,42 @@ const Navbar = () => {
         <Nav className='ml-auto'>
           {isLoggedIn && (
             <NavItem>
-              <button className='btn btn-link' onClick={handleFund}>
+              <button
+                className={
+                  current == 'Fund'
+                    ? 'btn btn-link bg-secondary'
+                    : 'btn btn-link'
+                }
+                onClick={handleFund}
+              >
                 Fund
               </button>
             </NavItem>
           )}
           {isLoggedIn && (
             <NavItem>
-              <button className='btn btn-link' onClick={handleClaim}>
+              <button
+                className={
+                  current == 'Claim'
+                    ? 'btn btn-link bg-secondary'
+                    : 'btn btn-link'
+                }
+                onClick={handleClaim}
+              >
                 Claim
               </button>
             </NavItem>
           )}
           {isLoggedIn && (
             <NavItem>
-              <button className='btn btn-link' onClick={handleTrade}>
+              <button
+                className={
+                  current == 'Trade'
+                    ? 'btn btn-link bg-secondary'
+                    : 'btn btn-link'
+                }
+                onClick={handleTrade}
+              >
                 Trade
               </button>
             </NavItem>

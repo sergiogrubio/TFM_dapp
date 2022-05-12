@@ -4,26 +4,24 @@ import {
   useGetNetworkConfig
 } from '@elrondnetwork/dapp-core';
 import FormFund from '../../components/FormFund';
-import Actions from '../Common/Actions';
-import TopInfo from '../Common/TopInfo';
-import Transactions from '../Common/Transactions';
+import Transactions from '../../components/Transactions';
 import { Address, ProxyProvider } from '@elrondnetwork/erdjs';
 
 const Fund = () => {
-  const { address, account } = useGetAccountInfo();
-  const objAddress = new Address(address);
-  // const data1 = getAccount(address);
-  const { network } = useGetNetworkConfig();
-  const proxy = new ProxyProvider(network.apiAddress);
+  // const { address, account } = useGetAccountInfo();
+  // const objAddress = new Address(address);
+  // // const data1 = getAccount(address);
+  // const { network } = useGetNetworkConfig();
+  // const proxy = new ProxyProvider(network.apiAddress);
 
-  proxy
-    .getAddressEsdtList(objAddress)
-    .then(({ returnData }) => {
-      console.log(returnData);
-    })
-    .catch((err) => {
-      console.error('Unable to call VM query', err);
-    });
+  // proxy
+  //   .getAddressEsdtList(objAddress)
+  //   .then(({ returnData }) => {
+  //     console.log(returnData);
+  //   })
+  //   .catch((err) => {
+  //     console.error('Unable to call VM query', err);
+  //   });
 
   return (
     <div className='container py-4'>

@@ -37,10 +37,6 @@ const FormClaim = () => {
   const [amountToken, setAmountToken] = useState('');
   const [amountEarnEgld, setAmountEarnEgld] = useState('');
   const [amountEarnToken, setAmountEarnToken] = useState('');
-  const amountEgldEle = document.getElementById('amountEgld');
-  const amountTokenEle = document.getElementById('amountToken');
-  const amountEarnEgldEle = document.getElementById('amountEarnEgld');
-  const amountEarnTokenEle = document.getElementById('amountEarnToken');
 
   //   const { address, account } = useGetAccountInfo();
   const account = useGetAccountInfo();
@@ -48,15 +44,6 @@ const FormClaim = () => {
   const { network } = useGetNetworkConfig();
   const { address } = account;
   const { sendTransactions } = transactionServices;
-
-  React.useEffect(() => {
-    if (amountEgldEle !== null) amountEgldEle.textContent = `${amountEgld}`;
-    if (amountTokenEle !== null) amountTokenEle.textContent = `${amountToken}`;
-    if (amountEarnEgldEle !== null)
-      amountEarnEgldEle.textContent = `${amountEarnEgld}`;
-    if (amountEarnTokenEle !== null)
-      amountEarnTokenEle.textContent = `${amountEarnToken}`;
-  });
 
   // run it only for a single time to load the amount available of the first pair
   // variable 'ignore' is a trick to achieve that goal
@@ -235,7 +222,6 @@ const FormClaim = () => {
         errorMessage: 'An error has occured (claim pool)',
         successMessage: 'Claim pool transaction successful'
       },
-      gasLimit: 200000000, // default value wasn't enough
       redirectAfterSign: false
     });
     if (sessionId != null) {
@@ -244,7 +230,7 @@ const FormClaim = () => {
       updateAmountEgld(''); // setAmountEgld('0');
       updateAmountToken(''); // setAmountToken('0');
     } else {
-      console.log('claimPool');
+      console.log('claimPool error sessionId = null');
     }
   };
 
@@ -291,14 +277,12 @@ const FormClaim = () => {
         </div>
         <div className='form-group row mt-0 mb-0'>
           <label htmlFor='amountPair' className='text-info'>
-            Pool available: <span id='amountEgld'></span>-
-            <span id='amountToken'></span>
+            Pool available: {`${amountEgld}-${amountToken}`}
           </label>
         </div>
         <div className='form-group row mt-0 mb-0'>
           <label htmlFor='amountEarnings' className='text-info'>
-            Earnings available: <span id='amountEarnEgld'></span>-
-            <span id='amountEarnToken'></span>
+            Earnings available: {`${amountEarnEgld}-${amountEarnToken}`}
           </label>
         </div>
         <div className='d-flex mt-4 justify-content-center'>

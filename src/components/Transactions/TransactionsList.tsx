@@ -46,7 +46,9 @@ const TransactionList = ({
 
   return (
     <div className='p-3 mt-3'>
-      <h4 className='mb-3 font-weight-normal'>Smart Contract Transactions</h4>
+      <h4 className='mb-3 font-weight-normal text-center'>
+        Smart Contract Transactions
+      </h4>
       <div className='table-responsive'>
         <table className='transactions table pb-3'>
           <thead>

@@ -27,10 +27,9 @@ const App = () => {
       <DappProvider
         environment={environment}
         customNetworkConfig={{ name: 'customConfig', apiTimeout: 6000 }}
-        completedTransactionsDelay={200}
       >
         <Layout>
-          <TransactionsToastList />
+          <TransactionsToastList shouldRenderDefaultCss='true' />
           <NotificationModal />
           <SignTransactionsModals className='custom-class-for-modals' />
           <Routes>
