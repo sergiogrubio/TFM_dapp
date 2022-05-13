@@ -9,7 +9,7 @@ import { capitalize } from '../../controllers/common';
 const Layout = ({ children }: { children: React.ReactNode }) => {
   const { pathname, search } = useLocation();
   const menuOpt = pathname.split('/')[1];
-  console.log(capitalize(menuOpt), children);
+
   return (
     <div className='bg-light d-flex flex-column flex-fill wrapper'>
       <Navbar current={capitalize(menuOpt)} />

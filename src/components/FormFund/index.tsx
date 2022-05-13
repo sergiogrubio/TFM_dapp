@@ -4,7 +4,8 @@ import {
   refreshAccount,
   transactionServices,
   useSignTransactions,
-  useGetNetworkConfig
+  useGetNetworkConfig,
+  useGetAccountInfo
   // useGetAccountInfo,
   // useGetPendingTransactions,
 } from '@elrondnetwork/dapp-core';
@@ -26,13 +27,18 @@ import {
   hexEncodeNumber,
   hexDecodeNumber
 } from '../../controllers/common';
+import { CustomNetworkProvider } from '../../controllers/CustomNetworkProvider';
 
 const FormFund = () => {
   const [fundData, setFundData] = useState({
-    token: 'SGR-07dffb', // put first element in the SELECT, is there a better way to do it?
+    token: '',
     amountToken: 0,
     amountEgld: 0
   });
+
+  const [itemsSelect, setItemsSelect] = useState([
+    { identifier: '', name: 'select a token' }
+  ]);
 
   const /*transactionSessionId*/ [, setTransactionSessionId] = React.useState<
       string | null
@@ -40,6 +46,8 @@ const FormFund = () => {
   const [amountFundedEgld, setAmountFundedEgld] = useState('');
   const [amountFundedToken, setAmountFundedToken] = useState('');
   const { network } = useGetNetworkConfig();
+  const account = useGetAccountInfo();
+  const { address } = account;
 
   // run it only for a single time to load the amount available of the first pair
   // variable 'ignore' is a trick to achieve that goal
@@ -49,6 +57,7 @@ const FormFund = () => {
     if (!ignore) {
       updateFundedEgld('');
       updateFundedToken('');
+      updateTokens(address);
     }
 
     return () => {
@@ -107,6 +116,21 @@ const FormFund = () => {
         console.error('Unable to call VM query', err);
       });
   };
+
+  const getProvider = () => {
+    return new CustomNetworkProvider('https://devnet-api.elrond.com', {
+      timeout: 5000
+    });
+  };
+
+  const updateTokens = (myAdd: string) => {
+    const provider = getProvider();
+    const address = myAdd;
+    provider.getTokens(address).then((tokens) => {
+      setItemsSelect(tokens);
+    });
+  };
+
   // TODO: change "any"
   const handleInputChange = (event: any) => {
     setFundData({
@@ -119,6 +143,7 @@ const FormFund = () => {
     // so a solve it in a way I don't like...
     updateFundedEgld(event.target.value);
     updateFundedToken(event.target.value);
+    updateTokens(address);
   };
 
   const handleSubmit = async (event: any) => {
@@ -187,9 +212,11 @@ const FormFund = () => {
             name='token'
             onChange={handleInputChange}
           >
-            <option value='SGR-07dffb'>SGR</option>
-            <option value='UOC-d139bb'>UOC</option>
-            <option value='WEB-5d08be'>WEB</option>
+            {itemsSelect.map((x) => (
+              <option key={x.identifier} value={x.identifier}>
+                {x.name}
+              </option>
+            ))}
           </select>
         </div>
         <div className='form-group row'>

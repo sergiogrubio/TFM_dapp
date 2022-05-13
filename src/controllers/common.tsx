@@ -6,6 +6,7 @@ import {
   // useGetAccountInfo,
   // useGetPendingTransactions,
 } from '@elrondnetwork/dapp-core';
+
 // idea from:
 // https://github.com/bogdan-rosianu/elrond-converters
 export const hexEncodeStr = (str: string) =>

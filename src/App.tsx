@@ -1,5 +1,10 @@
 import React from 'react';
-import { DappUI, DappProvider } from '@elrondnetwork/dapp-core';
+import {
+  DappUI,
+  DappProvider,
+  useGetTransactionDisplayInfo,
+  useGetSignedTransactions
+} from '@elrondnetwork/dapp-core';
 import { Route, Routes, BrowserRouter as Router } from 'react-router-dom';
 import Layout from 'components/Layout';
 // import Fund from 'pages/Fund';
@@ -29,7 +34,7 @@ const App = () => {
         customNetworkConfig={{ name: 'customConfig', apiTimeout: 6000 }}
       >
         <Layout>
-          <TransactionsToastList shouldRenderDefaultCss='true' />
+          <TransactionsToastList />
           <NotificationModal />
           <SignTransactionsModals className='custom-class-for-modals' />
           <Routes>

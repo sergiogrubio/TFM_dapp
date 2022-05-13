@@ -23,7 +23,10 @@ import {
   Query,
   TypedValue
 } from '@elrondnetwork/erdjs';
+import { StateType } from '../../components/Transactions/types';
 import { contractAddress } from 'config';
+import { CustomNetworkProvider } from '../../controllers/CustomNetworkProvider';
+import { isTypeNode } from 'typescript';
 
 const FormClaim = () => {
   const [claimData, setClaimData] = useState({
@@ -40,10 +43,43 @@ const FormClaim = () => {
 
   //   const { address, account } = useGetAccountInfo();
   const account = useGetAccountInfo();
-  const { hasPendingTransactions } = useGetPendingTransactions();
   const { network } = useGetNetworkConfig();
   const { address } = account;
-  const { sendTransactions } = transactionServices;
+  const { sendTransactions, useGetActiveTransactionsStatus } =
+    transactionServices;
+  const { pending, timedOut, fail, success, completed, hasActiveTransactions } =
+    useGetActiveTransactionsStatus();
+  const {
+    pendingTransactions,
+    pendingTransactionsArray,
+    hasPendingTransactions
+  } = useGetPendingTransactions();
+  const {
+    network: { apiAddress }
+  } = useGetNetworkConfig();
+  const [itemsSelect, setItemsSelect] = useState([
+    { identifier: '', name: 'select a pair' }
+  ]);
+  const [state, setState] = React.useState<StateType>({
+    transactions: [],
+    transactionsFetched: undefined
+  });
+
+  const trans = () => {
+    console.log(
+      pending,
+      timedOut,
+      fail,
+      success,
+      completed,
+      hasActiveTransactions
+    );
+    console.log(
+      pendingTransactions,
+      pendingTransactionsArray,
+      hasPendingTransactions
+    );
+  };
 
   // run it only for a single time to load the amount available of the first pair
   // variable 'ignore' is a trick to achieve that goal
@@ -55,12 +91,31 @@ const FormClaim = () => {
       updateAmountToken('');
       updateEarningsToken('');
       updateEarningsEgld('');
+      updateTokens(address);
     }
 
     return () => {
       ignore = true;
     };
   }, []);
+
+  const getProvider = () => {
+    return new CustomNetworkProvider('https://devnet-api.elrond.com', {
+      timeout: 5000
+    });
+  };
+
+  const updateTokens = (myAdd: string) => {
+    const provider = getProvider();
+    const address = myAdd;
+    provider.getTokens(address).then((tokens) => {
+      const newTokens = tokens.map((i: { name: string }) => {
+        i.name = 'xEGLD-' + i.name;
+      });
+      console.log(tokens);
+      setItemsSelect(tokens);
+    });
+  };
 
   const updateAmountToken = async (value: string) => {
     const pair = value || claimData.pair;
@@ -183,12 +238,12 @@ const FormClaim = () => {
 
     const { sessionId /*, error*/ } = await sendTransactions({
       transactions: [transaction1, transaction2],
-      transactionsDisplayInfo: {
-        processingMessage: 'Processing claim transaction',
-        errorMessage: 'An error has occured (claim)',
-        successMessage: 'Claim transaction successful'
-      },
-      minGasLimit: 120000, // default value wasn't enough
+      // transactionsDisplayInfo: {
+      //   processingMessage: 'Processing claim transaction',
+      //   errorMessage: 'An error has occured (claim)',
+      //   successMessage: 'Claim transaction successful'
+      // },
+      // minGasLimit: 120000, // default value wasn't enough
       redirectAfterSign: false
     });
     if (sessionId != null) {
@@ -217,15 +272,14 @@ const FormClaim = () => {
 
     const { sessionId /*, error*/ } = await sendTransactions({
       transactions: [transaction1, transaction2],
-      transactionsDisplayInfo: {
-        processingMessage: 'Processing claim pool transaction',
-        errorMessage: 'An error has occured (claim pool)',
-        successMessage: 'Claim pool transaction successful'
-      },
+      // transactionsDisplayInfo: {
+      //   processingMessage: 'Processing claim pool transaction',
+      //   errorMessage: 'An error has occured (claim pool)',
+      //   successMessage: 'Claim pool transaction successful'
+      // },
       redirectAfterSign: false
     });
     if (sessionId != null) {
-      console.log(sessionId);
       setTransactionSessionId(sessionId);
       updateAmountEgld(''); // setAmountEgld('0');
       updateAmountToken(''); // setAmountToken('0');
@@ -270,9 +324,11 @@ const FormClaim = () => {
             name='pair'
             onChange={handleInputChange}
           >
-            <option value='SGR-07dffb'>xEGLD-SGR</option>
-            <option value='UOC-d139bb'>xEGLD-UOC</option>
-            <option value='WEB-5d08be'>xEGLD-WEB</option>
+            {itemsSelect.map((x) => (
+              <option key={x.identifier} value={x.identifier}>
+                {x.name}
+              </option>
+            ))}
           </select>
         </div>
         <div className='form-group row mt-0 mb-0'>
@@ -293,6 +349,10 @@ const FormClaim = () => {
           <button className='btn bg-white m-2' onClick={claimPool}>
             <FontAwesomeIcon icon={faArrowDown} className='text-primary' />
             Claim pool
+          </button>
+          <button className='btn bg-white m-2' onClick={trans}>
+            <FontAwesomeIcon icon={faArrowDown} className='text-primary' />
+            trans
           </button>
         </div>
       </form>

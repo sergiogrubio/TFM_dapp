@@ -19,10 +19,10 @@ const FormTrade = () => {
             Select pair:
           </label>
           <select className='form-control' id='token' name='token'>
-            <option>EGLD-UOC</option>
-            <option>UOC-EGLD</option>
-            <option>EGLD-WEB</option>
-            <option>WEB-EGLD</option>
+            <option value='MHP-737aa1'>xEGLD-MHP</option>
+            <option value='SGR-07dffb'>xEGLD-SGR</option>
+            <option value='UOC-d139bb'>xEGLD-UOC</option>
+            <option value='WEB-5d08be'>xEGLD-WEB</option>
           </select>
         </div>
         <div className='form-group row'>
