@@ -30,17 +30,18 @@ import { isTypeNode } from 'typescript';
 
 const FormClaim = () => {
   const [claimData, setClaimData] = useState({
-    pair: 'SGR-07dffb' // put first element in the SELECT, is there a better way to do it?
+    pair: ''
   });
+  const [itemsSelect, setItemsSelect] = useState([
+    { identifier: '', name: 'select a pair' }
+  ]);
   const /*transactionSessionId*/ [, setTransactionSessionId] = React.useState<
       string | null
     >(null);
-
   const [amountEgld, setAmountEgld] = useState('');
   const [amountToken, setAmountToken] = useState('');
   const [amountEarnEgld, setAmountEarnEgld] = useState('');
   const [amountEarnToken, setAmountEarnToken] = useState('');
-
   //   const { address, account } = useGetAccountInfo();
   const account = useGetAccountInfo();
   const { network } = useGetNetworkConfig();
@@ -57,9 +58,6 @@ const FormClaim = () => {
   const {
     network: { apiAddress }
   } = useGetNetworkConfig();
-  const [itemsSelect, setItemsSelect] = useState([
-    { identifier: '', name: 'select a pair' }
-  ]);
   const [state, setState] = React.useState<StateType>({
     transactions: [],
     transactionsFetched: undefined
@@ -87,11 +85,11 @@ const FormClaim = () => {
     let ignore = false;
 
     if (!ignore) {
-      updateAmountEgld('');
-      updateAmountToken('');
-      updateEarningsToken('');
-      updateEarningsEgld('');
       updateTokens(address);
+      updateAmountEgld(claimData.pair);
+      updateAmountToken(claimData.pair);
+      updateEarningsToken(claimData.pair);
+      updateEarningsEgld(claimData.pair);
     }
 
     return () => {
@@ -117,8 +115,7 @@ const FormClaim = () => {
     });
   };
 
-  const updateAmountToken = async (value: string) => {
-    const pair = value || claimData.pair;
+  const updateAmountToken = async (pair: string) => {
     const query = new Query({
       address: new Address(contractAddress),
       func: new ContractFunction('getLiquidityToken'),
@@ -143,8 +140,7 @@ const FormClaim = () => {
       });
   };
 
-  const updateAmountEgld = async (value: string) => {
-    const pair = value || claimData.pair;
+  const updateAmountEgld = async (pair: string) => {
     const query = new Query({
       address: new Address(contractAddress),
       func: new ContractFunction('getLiquidityEgld'),
@@ -169,8 +165,7 @@ const FormClaim = () => {
       });
   };
 
-  const updateEarningsToken = async (value: string) => {
-    const pair = value || claimData.pair;
+  const updateEarningsToken = async (pair: string) => {
     const query = new Query({
       address: new Address(contractAddress),
       func: new ContractFunction('getEarnings'),
@@ -195,8 +190,7 @@ const FormClaim = () => {
       });
   };
 
-  const updateEarningsEgld = async (value: string) => {
-    const pair = value || claimData.pair;
+  const updateEarningsEgld = async (pair: string) => {
     const query = new Query({
       address: new Address(contractAddress),
       func: new ContractFunction('getEarnings'),
@@ -226,12 +220,14 @@ const FormClaim = () => {
     const transaction1 = {
       value: '0',
       data: 'claimEarnings' + '@' + hexEncodeStr(pair),
-      receiver: contractAddress
+      receiver: contractAddress,
+      gasLimit: 60000000
     };
     const transaction2 = {
       value: '0',
       data: 'claimEarnings' + '@' + hexEncodeStr('EGLD'),
-      receiver: contractAddress
+      receiver: contractAddress,
+      gasLimit: 60000000
     };
 
     await refreshAccount();
@@ -260,12 +256,14 @@ const FormClaim = () => {
     const transaction1 = {
       value: '0',
       data: 'claimLiquidityToken' + '@' + hexEncodeStr(pair),
-      receiver: contractAddress
+      receiver: contractAddress,
+      gasLimit: 60000000
     };
     const transaction2 = {
       value: '0',
       data: 'claimLiquidityEgld' + '@' + hexEncodeStr(pair),
-      receiver: contractAddress
+      receiver: contractAddress,
+      gasLimit: 60000000
     };
 
     await refreshAccount();
@@ -306,6 +304,22 @@ const FormClaim = () => {
 
   const handleSubmit = (event: any) => {
     event.preventDefault();
+    const btn = document.activeElement;
+    console.log(btn?.textContent);
+    switch (btn?.textContent) {
+      case 'Claim earnings': {
+        claimEarnings();
+        break;
+      }
+      case 'Claim pool': {
+        claimPool();
+        break;
+      }
+      default: {
+        trans();
+        break;
+      }
+    }
   };
 
   return (
@@ -323,7 +337,12 @@ const FormClaim = () => {
             id='pair'
             name='pair'
             onChange={handleInputChange}
+            placeholder='select a pair'
+            required
           >
+            <option key='' value=''>
+              select a pair
+            </option>
             {itemsSelect.map((x) => (
               <option key={x.identifier} value={x.identifier}>
                 {x.name}
@@ -342,15 +361,19 @@ const FormClaim = () => {
           </label>
         </div>
         <div className='d-flex mt-4 justify-content-center'>
-          <button className='btn bg-white m-2' onClick={claimEarnings}>
+          <button
+            name='bEarnings'
+            value='bEarnings'
+            className='btn bg-white m-2'
+          >
             <FontAwesomeIcon icon={faArrowDown} className='text-primary' />
             Claim earnings
           </button>
-          <button className='btn bg-white m-2' onClick={claimPool}>
+          <button name='bPool' value='bPool' className='btn bg-white m-2'>
             <FontAwesomeIcon icon={faArrowDown} className='text-primary' />
             Claim pool
           </button>
-          <button className='btn bg-white m-2' onClick={trans}>
+          <button name='bTrans' value='bTrans' className='btn bg-white m-2'>
             <FontAwesomeIcon icon={faArrowDown} className='text-primary' />
             trans
           </button>

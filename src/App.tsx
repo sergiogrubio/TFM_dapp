@@ -12,7 +12,10 @@ import PageNotFound from 'pages/PageNotFound';
 import { routeNames } from 'routes';
 import routes from 'routes';
 
-import '@elrondnetwork/dapp-core/build/index.css';
+// updating to @elrondnetwork/dapp-core@1.1.21 css is lost
+// import '@elrondnetwork/dapp-core/build/index.css';
+// I copied that file to dapp-core.css
+import './dapp-core.css';
 
 const environment = 'devnet';
 

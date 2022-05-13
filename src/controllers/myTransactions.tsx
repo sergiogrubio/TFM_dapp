@@ -25,6 +25,6 @@ export const addLiquidityToken = (token: string, amount: string) => {
   return contract.call({
     func: new ContractFunction('addLiquidityToken'),
     args: [BytesValue.fromUTF8(token), new U32Value(Number(amount))],
-    gasLimit: new GasLimit(5000000)
+    gasLimit: new GasLimit(60000000)
   });
 };
