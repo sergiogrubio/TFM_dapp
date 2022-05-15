@@ -1,12 +1,4 @@
 import BigNumber from 'bignumber.js';
-import {
-  refreshAccount,
-  transactionServices,
-  useSignTransactions
-  // useGetAccountInfo,
-  // useGetPendingTransactions,
-} from '@elrondnetwork/dapp-core';
-
 // idea from:
 // https://github.com/bogdan-rosianu/elrond-converters
 export const hexEncodeStr = (str: string) =>
@@ -33,43 +25,8 @@ export const hexDecodeNumber = (num: string) => {
 
   return bnDec;
 };
+
 export function capitalize(str: string) {
   const lower = str.toLowerCase();
   return str.charAt(0).toUpperCase() + lower.slice(1);
 }
-
-export const mySendTransaction = async (
-  amount: number,
-  dataTransaction: string,
-  receiverAddress: string,
-  msgProcess: string,
-  msgError: string,
-  msgSuccess: string
-) => {
-  console.log(amount, dataTransaction, receiverAddress);
-  const { sendTransactions } = transactionServices;
-  const transaction = {
-    value: amount,
-    data: dataTransaction,
-    receiver: receiverAddress
-  };
-
-  await refreshAccount();
-
-  const { sessionId, error } = await sendTransactions({
-    transactions: transaction,
-    transactionsDisplayInfo: {
-      processingMessage: msgProcess,
-      errorMessage: msgError,
-      successMessage: msgSuccess
-      // transactionDuration: 10000
-    },
-    redirectAfterSign: false
-  });
-
-  if (error != null) {
-    console.log(error);
-  }
-
-  return { sessionId, error };
-};

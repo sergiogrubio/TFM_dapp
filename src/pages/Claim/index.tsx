@@ -1,31 +1,9 @@
 import * as React from 'react';
-import {
-  useGetAccountInfo,
-  useGetNetworkConfig
-} from '@elrondnetwork/dapp-core';
 
 import FormClaim from '../../components/FormClaim';
 import Transactions from '../../components/Transactions';
-import { Address, ProxyProvider } from '@elrondnetwork/erdjs';
 
 const Claim = () => {
-  // const { address, account } = useGetAccountInfo();
-  // console.log(address);
-  // const objAddress = new Address(address);
-  // // const data1 = getAccount(address);
-  // const { network } = useGetNetworkConfig();
-  // const proxy = new ProxyProvider(network.apiAddress);
-
-  // console.log(proxy);
-  // proxy
-  //   .getAddressEsdtList(objAddress)
-  //   .then(({ returnData }) => {
-  //     console.log(returnData);
-  //   })
-  //   .catch((err) => {
-  //     console.error('Unable to call VM query', err);
-  //   });
-
   return (
     <div className='container py-4'>
       <div className='row'>

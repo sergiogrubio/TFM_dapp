@@ -1,34 +1,18 @@
 import React from 'react';
 import { useState } from 'react';
 import {
-  refreshAccount,
-  transactionServices,
-  useSignTransactions,
   useGetNetworkConfig,
   useGetAccountInfo
-  // useGetAccountInfo,
-  // useGetPendingTransactions,
 } from '@elrondnetwork/dapp-core';
-import {
-  Address,
-  AddressValue,
-  BytesValue,
-  ContractFunction,
-  ProxyProvider,
-  Query,
-  TypedValue
-} from '@elrondnetwork/erdjs';
 import { faArrowUp } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { contractAddress } from 'config';
-import { addLiquidityToken } from '../../controllers/myTransactions';
+import { contractAddress, providerAddress } from 'config';
+import { hexEncodeStr, hexEncodeNumber } from '../../controllers/common';
 import {
-  hexEncodeStr,
-  hexEncodeNumber,
-  hexDecodeNumber
-} from '../../controllers/common';
-import { CustomNetworkProvider } from '../../controllers/CustomNetworkProvider';
-
+  CustomNetworkProvider,
+  genericQuery,
+  genericTransactions
+} from '../../controllers/myTransactions';
 const FormFund = () => {
   const [fundData, setFundData] = useState({
     token: '',
@@ -38,14 +22,15 @@ const FormFund = () => {
   const [itemsSelect, setItemsSelect] = useState([
     { identifier: '', name: 'select a token' }
   ]);
-  const /*transactionSessionId*/ [, setTransactionSessionId] = React.useState<
-      string | null
-    >(null);
+
   const [amountFundedEgld, setAmountFundedEgld] = useState('');
   const [amountFundedToken, setAmountFundedToken] = useState('');
   const { network } = useGetNetworkConfig();
   const account = useGetAccountInfo();
   const { address } = account;
+  const /*transactionSessionId*/ [, setTransactionSessionId] = React.useState<
+      string | null
+    >(null);
 
   // run it only for a single time to load the amount available of the first pair
   // variable 'ignore' is a trick to achieve that goal
@@ -53,6 +38,7 @@ const FormFund = () => {
     let ignore = false;
 
     if (!ignore) {
+      // tokens inside the user's wallet
       updateTokens(address);
     }
 
@@ -77,66 +63,35 @@ const FormFund = () => {
   };
 
   const updateFundedToken = async (token: string) => {
-    const query = new Query({
-      address: new Address(contractAddress),
-      func: new ContractFunction('getLiquidityToken'),
-      args: [BytesValue.fromHex(hexEncodeStr(token))]
-    });
-    const proxy = new ProxyProvider(network.apiAddress);
-    proxy
-      .queryContract(query)
-      .then(({ returnData }) => {
-        const [encoded] = returnData;
-        const decoded = Buffer.from(encoded, 'base64').toString('hex');
-        const decNumber = hexDecodeNumber(decoded);
-        // console.log(decNumber);
-        if (decNumber === '') {
-          setAmountFundedToken('0');
-        } else {
-          setAmountFundedToken(decNumber);
-        }
-      })
-      .catch((err) => {
-        console.error('Unable to call VM query', err);
-      });
+    genericQuery(
+      contractAddress,
+      network,
+      'getLiquidityToken',
+      token,
+      setAmountFundedToken
+    );
   };
 
   const updateFundedEgld = async (token: string) => {
-    const query = new Query({
-      address: new Address(contractAddress),
-      func: new ContractFunction('getLiquidityEgld'),
-      args: [BytesValue.fromHex(hexEncodeStr(token))]
+    genericQuery(
+      contractAddress,
+      network,
+      'getLiquidityEgld',
+      token,
+      setAmountFundedEgld
+    );
+  };
+
+  const getProvider = () => {
+    return new CustomNetworkProvider(providerAddress, {
+      timeout: 5000
     });
-    const proxy = new ProxyProvider(network.apiAddress);
-    proxy
-      .queryContract(query)
-      .then(({ returnData }) => {
-        const [encoded] = returnData;
-        const decoded = Buffer.from(encoded, 'base64').toString('hex');
-        const decNumber = hexDecodeNumber(decoded);
-        // console.log(decNumber);
-        if (decNumber === '') {
-          setAmountFundedEgld('0');
-        } else {
-          setAmountFundedEgld(decNumber);
-        }
-      })
-      .catch((err) => {
-        console.error('Unable to call VM query', err);
-      });
   };
 
   const updateTokens = (myAdd: string) => {
     const provider = getProvider();
-    const address = myAdd;
-    provider.getTokens(address).then((tokens) => {
+    provider.getTokens(myAdd).then((tokens) => {
       setItemsSelect(tokens);
-    });
-  };
-
-  const getProvider = () => {
-    return new CustomNetworkProvider('https://devnet-api.elrond.com', {
-      timeout: 5000
     });
   };
 
@@ -148,9 +103,6 @@ const FormFund = () => {
     const token = fundData.token;
     const amountToken = fundData.amountToken;
     const amountEgld = fundData.amountEgld;
-
-    const { sendTransactions } = transactionServices;
-
     const data =
       'ESDTTransfer' +
       '@' +
@@ -174,19 +126,7 @@ const FormFund = () => {
       gasLimit: 60000000
     };
 
-    await refreshAccount();
-
-    const { sessionId, error } = await sendTransactions({
-      transactions: [transaction2, transaction1],
-      transactionsDisplayInfo: {
-        processingMessage: 'Adding liquidity token',
-        errorMessage: 'An error has occured (liq. token)',
-        successMessage: 'Liquidity token added successfully'
-        // transactionDuration: 10000
-      },
-      redirectAfterSign: false
-    });
-
+    const sessionId = await genericTransactions([transaction1, transaction2]);
     if (sessionId != null) {
       setTransactionSessionId(sessionId);
     }

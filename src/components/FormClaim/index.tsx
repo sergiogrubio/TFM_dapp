@@ -1,32 +1,16 @@
 import React from 'react';
 import { useState } from 'react';
-import {
-  useGetAccountInfo,
-  useGetNetworkConfig,
-  useGetPendingTransactions,
-  refreshAccount,
-  transactionServices
-} from '@elrondnetwork/dapp-core';
+import { useGetNetworkConfig } from '@elrondnetwork/dapp-core';
 import { faArrowDown } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { contractAddress, providerAddress } from 'config';
+import { hexEncodeStr } from '../../controllers/common';
+
 import {
-  hexEncodeStr,
-  hexEncodeNumber,
-  hexDecodeNumber
-} from '../../controllers/common';
-import {
-  Address,
-  AddressValue,
-  BytesValue,
-  ContractFunction,
-  ProxyProvider,
-  Query,
-  TypedValue
-} from '@elrondnetwork/erdjs';
-import { StateType } from '../../components/Transactions/types';
-import { contractAddress } from 'config';
-import { CustomNetworkProvider } from '../../controllers/CustomNetworkProvider';
-import { isTypeNode } from 'typescript';
+  CustomNetworkProvider,
+  genericQuery,
+  genericTransactions
+} from '../../controllers/myTransactions';
 
 const FormClaim = () => {
   const [claimData, setClaimData] = useState({
@@ -42,42 +26,7 @@ const FormClaim = () => {
   const [amountToken, setAmountToken] = useState('');
   const [amountEarnEgld, setAmountEarnEgld] = useState('');
   const [amountEarnToken, setAmountEarnToken] = useState('');
-  //   const { address, account } = useGetAccountInfo();
-  const account = useGetAccountInfo();
   const { network } = useGetNetworkConfig();
-  const { address } = account;
-  const { sendTransactions, useGetActiveTransactionsStatus } =
-    transactionServices;
-  const { pending, timedOut, fail, success, completed, hasActiveTransactions } =
-    useGetActiveTransactionsStatus();
-  const {
-    pendingTransactions,
-    pendingTransactionsArray,
-    hasPendingTransactions
-  } = useGetPendingTransactions();
-  const {
-    network: { apiAddress }
-  } = useGetNetworkConfig();
-  const [state, setState] = React.useState<StateType>({
-    transactions: [],
-    transactionsFetched: undefined
-  });
-
-  const trans = () => {
-    console.log(
-      pending,
-      timedOut,
-      fail,
-      success,
-      completed,
-      hasActiveTransactions
-    );
-    console.log(
-      pendingTransactions,
-      pendingTransactionsArray,
-      hasPendingTransactions
-    );
-  };
 
   // run it only for a single time to load the amount available of the first pair
   // variable 'ignore' is a trick to achieve that goal
@@ -85,11 +34,12 @@ const FormClaim = () => {
     let ignore = false;
 
     if (!ignore) {
-      updateTokens(address);
-      updateAmountEgld(claimData.pair);
-      updateAmountToken(claimData.pair);
-      updateEarningsToken(claimData.pair);
-      updateEarningsEgld(claimData.pair);
+      // tokens inside the smart contract
+      updateTokens(contractAddress);
+      // updateAmountEgld(claimData.pair);
+      // updateAmountToken(claimData.pair);
+      // updateEarningsToken(claimData.pair);
+      // updateEarningsEgld();
     }
 
     return () => {
@@ -98,7 +48,7 @@ const FormClaim = () => {
   }, []);
 
   const getProvider = () => {
-    return new CustomNetworkProvider('https://devnet-api.elrond.com', {
+    return new CustomNetworkProvider(providerAddress, {
       timeout: 5000
     });
   };
@@ -107,112 +57,56 @@ const FormClaim = () => {
     const provider = getProvider();
     const address = myAdd;
     provider.getTokens(address).then((tokens) => {
-      const newTokens = tokens.map((i: { name: string }) => {
+      tokens.map((i: { name: string }) => {
         i.name = 'xEGLD-' + i.name;
       });
-      console.log(tokens);
+      // idea for sorting:
+      // https://stackoverflow.com/questions/1129216/sort-array-of-objects-by-string-property-value
+      tokens = tokens.sort((a: any, b: any) =>
+        a.name > b.name ? 1 : b.name > a.name ? -1 : 0
+      );
       setItemsSelect(tokens);
     });
   };
 
   const updateAmountToken = async (pair: string) => {
-    const query = new Query({
-      address: new Address(contractAddress),
-      func: new ContractFunction('getLiquidityToken'),
-      args: [BytesValue.fromHex(hexEncodeStr(pair))]
-    });
-    const proxy = new ProxyProvider(network.apiAddress);
-    proxy
-      .queryContract(query)
-      .then(({ returnData }) => {
-        const [encoded] = returnData;
-        const decoded = Buffer.from(encoded, 'base64').toString('hex');
-        const decNumber = hexDecodeNumber(decoded);
-        // console.log(decNumber);
-        if (decNumber === '') {
-          setAmountToken('0');
-        } else {
-          setAmountToken(decNumber);
-        }
-      })
-      .catch((err) => {
-        console.error('Unable to call VM query', err);
-      });
+    genericQuery(
+      contractAddress,
+      network,
+      'getLiquidityToken',
+      pair,
+      setAmountToken
+    );
   };
 
   const updateAmountEgld = async (pair: string) => {
-    const query = new Query({
-      address: new Address(contractAddress),
-      func: new ContractFunction('getLiquidityEgld'),
-      args: [BytesValue.fromHex(hexEncodeStr(pair))]
-    });
-    const proxy = new ProxyProvider(network.apiAddress);
-    proxy
-      .queryContract(query)
-      .then(({ returnData }) => {
-        const [encoded] = returnData;
-        const decoded = Buffer.from(encoded, 'base64').toString('hex');
-        const decNumber = hexDecodeNumber(decoded);
-        // console.log(decNumber);
-        if (decNumber === '') {
-          setAmountEgld('0');
-        } else {
-          setAmountEgld(decNumber);
-        }
-      })
-      .catch((err) => {
-        console.error('Unable to call VM query', err);
-      });
+    genericQuery(
+      contractAddress,
+      network,
+      'getLiquidityEgld',
+      pair,
+      setAmountEgld
+    );
   };
 
   const updateEarningsToken = async (pair: string) => {
-    const query = new Query({
-      address: new Address(contractAddress),
-      func: new ContractFunction('getEarnings'),
-      args: [BytesValue.fromHex(hexEncodeStr(pair))]
-    });
-    const proxy = new ProxyProvider(network.apiAddress);
-    proxy
-      .queryContract(query)
-      .then(({ returnData }) => {
-        const [encoded] = returnData;
-        const decoded = Buffer.from(encoded, 'base64').toString('hex');
-        const decNumber = hexDecodeNumber(decoded);
-        // console.log(decNumber);
-        if (decNumber === '') {
-          setAmountEarnToken('0');
-        } else {
-          setAmountEarnToken(decNumber);
-        }
-      })
-      .catch((err) => {
-        console.error('Unable to call VM query', err);
-      });
+    genericQuery(
+      contractAddress,
+      network,
+      'getEarnings',
+      pair,
+      setAmountEarnToken
+    );
   };
 
-  const updateEarningsEgld = async (pair: string) => {
-    const query = new Query({
-      address: new Address(contractAddress),
-      func: new ContractFunction('getEarnings'),
-      args: [BytesValue.fromHex(hexEncodeStr('EGLD'))]
-    });
-    const proxy = new ProxyProvider(network.apiAddress);
-    proxy
-      .queryContract(query)
-      .then(({ returnData }) => {
-        const [encoded] = returnData;
-        const decoded = Buffer.from(encoded, 'base64').toString('hex');
-        const decNumber = hexDecodeNumber(decoded);
-        // console.log(decNumber);
-        if (decNumber === '') {
-          setAmountEarnEgld('0');
-        } else {
-          setAmountEarnEgld(decNumber);
-        }
-      })
-      .catch((err) => {
-        console.error('Unable to call VM query', err);
-      });
+  const updateEarningsEgld = async () => {
+    genericQuery(
+      contractAddress,
+      network,
+      'getEarnings',
+      'EGLD',
+      setAmountEarnEgld
+    );
   };
 
   const claimEarnings = async () => {
@@ -230,22 +124,12 @@ const FormClaim = () => {
       gasLimit: 60000000
     };
 
-    await refreshAccount();
+    const sessionId = await genericTransactions([transaction1, transaction2]);
 
-    const { sessionId /*, error*/ } = await sendTransactions({
-      transactions: [transaction1, transaction2],
-      // transactionsDisplayInfo: {
-      //   processingMessage: 'Processing claim transaction',
-      //   errorMessage: 'An error has occured (claim)',
-      //   successMessage: 'Claim transaction successful'
-      // },
-      // minGasLimit: 120000, // default value wasn't enough
-      redirectAfterSign: false
-    });
     if (sessionId != null) {
       setTransactionSessionId(sessionId);
       updateEarningsToken('');
-      updateEarningsEgld('');
+      updateEarningsEgld();
     } else {
       console.log('claimEarnings');
     }
@@ -266,17 +150,8 @@ const FormClaim = () => {
       gasLimit: 60000000
     };
 
-    await refreshAccount();
+    const sessionId = await genericTransactions([transaction1, transaction2]);
 
-    const { sessionId /*, error*/ } = await sendTransactions({
-      transactions: [transaction1, transaction2],
-      // transactionsDisplayInfo: {
-      //   processingMessage: 'Processing claim pool transaction',
-      //   errorMessage: 'An error has occured (claim pool)',
-      //   successMessage: 'Claim pool transaction successful'
-      // },
-      redirectAfterSign: false
-    });
     if (sessionId != null) {
       setTransactionSessionId(sessionId);
       updateAmountEgld(''); // setAmountEgld('0');
@@ -299,7 +174,7 @@ const FormClaim = () => {
     updateAmountEgld(event.target.value);
     updateAmountToken(event.target.value);
     updateEarningsToken(event.target.value);
-    updateEarningsEgld(event.target.value);
+    updateEarningsEgld();
   };
 
   const handleSubmit = (event: any) => {
@@ -316,7 +191,7 @@ const FormClaim = () => {
         break;
       }
       default: {
-        trans();
+        console.log('something went wrong');
         break;
       }
     }
@@ -372,10 +247,6 @@ const FormClaim = () => {
           <button name='bPool' value='bPool' className='btn bg-white m-2'>
             <FontAwesomeIcon icon={faArrowDown} className='text-primary' />
             Claim pool
-          </button>
-          <button name='bTrans' value='bTrans' className='btn bg-white m-2'>
-            <FontAwesomeIcon icon={faArrowDown} className='text-primary' />
-            trans
           </button>
         </div>
       </form>

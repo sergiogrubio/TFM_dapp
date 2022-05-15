@@ -2,9 +2,9 @@ import React from 'react';
 import { AuthenticatedRoutesWrapper } from '@elrondnetwork/dapp-core';
 import { useLocation } from 'react-router-dom';
 import routes, { routeNames } from 'routes';
+import { capitalize } from '../../controllers/common';
 import Footer from './Footer';
 import Navbar from './Navbar';
-import { capitalize } from '../../controllers/common';
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
   const { pathname, search } = useLocation();

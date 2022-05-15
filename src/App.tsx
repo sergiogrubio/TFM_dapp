@@ -1,9 +1,9 @@
 import React from 'react';
 import {
   DappUI,
-  DappProvider,
-  useGetTransactionDisplayInfo,
-  useGetSignedTransactions
+  DappProvider
+  // useGetTransactionDisplayInfo,
+  // useGetSignedTransactions
 } from '@elrondnetwork/dapp-core';
 import { Route, Routes, BrowserRouter as Router } from 'react-router-dom';
 import Layout from 'components/Layout';

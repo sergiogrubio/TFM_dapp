@@ -1,30 +1,61 @@
-import { contractAddress } from '../config';
-import { BigNumber } from 'bignumber.js';
+import { refreshAccount, transactionServices } from '@elrondnetwork/dapp-core';
 import {
   Address,
-  ContractFunction,
-  U32Value,
-  U64Value,
-  Balance,
-  Code,
-  SmartContract,
-  GasLimit,
-  CodeMetadata,
   BytesValue,
-  BigUIntValue,
-  BooleanValue
+  ContractFunction,
+  ProxyProvider,
+  Query
 } from '@elrondnetwork/erdjs';
-import { hexEncodeStr, hexEncodeNumber } from './common';
-// Create first piggy bank, you can have only one for now
-// Pass unix timestamp in the future, this is the lock time
-export const addLiquidityToken = (token: string, amount: string) => {
-  const contract = new SmartContract({
-    address: new Address(contractAddress)
+import { ApiNetworkProvider } from '@elrondnetwork/erdjs-network-providers';
+import { hexEncodeStr, hexDecodeNumber } from './common';
+
+export class CustomNetworkProvider extends ApiNetworkProvider {
+  async getTokens(address: string) {
+    return await this.doGetGeneric(`accounts/${address}/tokens`);
+  }
+}
+
+// TODO: change any for interface
+export const genericTransactions = async (pTransactions: any[]) => {
+  const { sendTransactions } = transactionServices;
+
+  await refreshAccount();
+
+  const { sessionId /*, error*/ } = await sendTransactions({
+    transactions: pTransactions,
+    redirectAfterSign: false
   });
 
-  return contract.call({
-    func: new ContractFunction('addLiquidityToken'),
-    args: [BytesValue.fromUTF8(token), new U32Value(Number(amount))],
-    gasLimit: new GasLimit(60000000)
+  return sessionId;
+};
+
+export const genericQuery = async (
+  pAddress: string,
+  pNetwork: any,
+  pFunction: string,
+  pToken: string,
+  setter: any
+) => {
+  const query = new Query({
+    address: new Address(pAddress),
+    func: new ContractFunction(pFunction),
+    args: [BytesValue.fromHex(hexEncodeStr(pToken))]
   });
+  const proxy = new ProxyProvider(pNetwork.apiAddress);
+  proxy
+    .queryContract(query)
+    .then(({ returnData }) => {
+      const [encoded] = returnData;
+      const decoded = Buffer.from(encoded, 'base64').toString('hex');
+      const decNumber = hexDecodeNumber(decoded);
+      // console.log(decNumber);
+      if (decNumber === '') {
+        setter('0');
+      } else {
+        setter(decNumber);
+      }
+    })
+    .catch((err) => {
+      console.error('Unable to call VM query', err);
+    });
 };

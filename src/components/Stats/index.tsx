@@ -1,16 +1,6 @@
 import React from 'react';
-import { useState } from 'react';
-
-import { faArrowUp } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 const Stats = () => {
-  const [fundData, setFundData] = useState({
-    token: '',
-    amountToken: 0,
-    amountEgld: 0
-  });
-
   return (
     <>
       <div className='row'>
