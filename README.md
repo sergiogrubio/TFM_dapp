@@ -4,6 +4,12 @@ testDEX is a simple DEX using the Elrond network. University master's degree fin
 
 Based on [Elrond dApp Template](https://github.com/ElrondNetwork/dapp-template), built using [React.js](https://reactjs.org/) and [Typescript](https://www.typescriptlang.org/). It's a basic implementation of [@elrondnetwork/dapp-core](https://www.npmjs.com/package/@elrondnetwork/dapp-core), providing the basics for Elrond authentication and TX signing. See [Dapp template](https://dapp-template.elrond.com/) for live demo.
 
+## About me and my personal situation
+
+I dedicated the last years to tasks far from programming. So I started this project knowing very little about blockchain, Elrond technology, Rust, Typescripts and even git!
+
+I am convinced that everything may be improved a lot. I like blockchain, so in the next few years I'll get more knowledge about all this and my idea is to improve things in this project.
+
 ## Requirements
 
 - Node.js version 12.16.2+
@@ -11,7 +17,7 @@ Based on [Elrond dApp Template](https://github.com/ElrondNetwork/dapp-template),
 
 ## Getting Started
 
-The dApp is a client side only project and is built using the [Create React App](https://create-react-app.dev) scripts. You can find the [smart contract also on GitHub](https://github.com/sergiogrubio/TFM_smart_contract). 
+The dApp is a client side only project and is built using the [Create React App](https://create-react-app.dev) scripts. You can find the [smart contract also on GitHub](https://github.com/sergiogrubio/TFM_smart_contract).
 
 ### Instalation and running
 
