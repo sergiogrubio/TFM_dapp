@@ -4,14 +4,15 @@ import {
   useGetNetworkConfig,
   useGetAccountInfo
 } from '@elrondnetwork/dapp-core';
+import { BytesValue } from '@elrondnetwork/erdjs';
 import { faArrowUp } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { contractAddress, providerAddress } from 'config';
+import { contractAddress } from 'config';
 import { hexEncodeStr, hexEncodeNumber } from '../../controllers/common';
 import {
-  CustomNetworkProvider,
-  genericQuery,
-  genericTransactions
+  getProvider,
+  myTransactions,
+  myQuery
 } from '../../controllers/myTransactions';
 const FormFund = () => {
   const [fundData, setFundData] = useState({
@@ -63,29 +64,20 @@ const FormFund = () => {
   };
 
   const updateFundedToken = async (token: string) => {
-    genericQuery(
+    const amount = await myQuery(
       contractAddress,
       network,
       'getLiquidityToken',
-      token,
-      setAmountFundedToken
+      [BytesValue.fromHex(hexEncodeStr(token))]
     );
+    setAmountFundedToken(amount);
   };
 
   const updateFundedEgld = async (token: string) => {
-    genericQuery(
-      contractAddress,
-      network,
-      'getLiquidityEgld',
-      token,
-      setAmountFundedEgld
-    );
-  };
-
-  const getProvider = () => {
-    return new CustomNetworkProvider(providerAddress, {
-      timeout: 5000
-    });
+    const amount = await myQuery(contractAddress, network, 'getLiquidityEgld', [
+      BytesValue.fromHex(hexEncodeStr(token))
+    ]);
+    setAmountFundedEgld(amount);
   };
 
   const updateTokens = (myAdd: string) => {
@@ -126,7 +118,7 @@ const FormFund = () => {
       gasLimit: 60000000
     };
 
-    const sessionId = await genericTransactions([transaction1, transaction2]);
+    const sessionId = await myTransactions([transaction1, transaction2]);
     if (sessionId != null) {
       setTransactionSessionId(sessionId);
     }

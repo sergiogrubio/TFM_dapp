@@ -1,27 +1,22 @@
 import React from 'react';
 import { useState } from 'react';
-import { useGetNetworkConfig } from '@elrondnetwork/dapp-core';
 import {
-  Address,
-  BytesValue,
-  ContractFunction,
-  ProxyProvider,
-  Query
-} from '@elrondnetwork/erdjs';
-import { faArrowUp, faArrowDown } from '@fortawesome/free-solid-svg-icons';
+  useGetNetworkConfig,
+  useGetAccountInfo
+} from '@elrondnetwork/dapp-core';
+import { BytesValue } from '@elrondnetwork/erdjs';
+import { faArrowDown } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { contractAddress, providerAddress } from 'config';
-import {
-  hexEncodeStr,
-  hexEncodeNumber,
-  hexDecodeNumber
-} from '../../controllers/common';
-import { CustomNetworkProvider } from '../../controllers/myTransactions';
+import BigNumber from 'bignumber.js';
+import { contractAddress } from 'config';
+import { hexEncodeNumber, hexEncodeStr } from '../../controllers/common';
+import { getProvider, myQuery } from '../../controllers/myTransactions';
 
 const FormTrade = () => {
-  const [amountToken1, setAmountToken1] = useState('');
+  const [priceToken1, setPriceToken1] = useState('');
   const [token1, setToken1] = useState('');
-  const [amountToken2, setAmountToken2] = useState('');
+  const [priceToken2, setPriceToken2] = useState('');
+  const [amountAvailable, setAmountAvailable] = useState('');
   const [token2, setToken2] = useState('');
   const [itemsSelect, setItemsSelect] = useState([
     { identifier: '', name: 'select a pair', value1: '', value2: '' }
@@ -33,6 +28,8 @@ const FormTrade = () => {
   const [initialK, setInitialK] = useState('0');
   const [currentK, setCurrentK] = useState('0');
   const { network } = useGetNetworkConfig();
+  const { address, account } = useGetAccountInfo();
+
   // run it only for a single time to load the amount available of the first pair
   // variable 'ignore' is a trick to achieve that goal
   React.useEffect(() => {
@@ -52,108 +49,52 @@ const FormTrade = () => {
     };
   }, []);
 
-  const getProvider = () => {
-    return new CustomNetworkProvider(providerAddress, {
-      timeout: 5000
-    });
+  const updatePriceEgldToken = async (token: string) => {
+    const amount = await myQuery(contractAddress, network, 'priceEgldToken', [
+      BytesValue.fromHex(hexEncodeStr(token)),
+      BytesValue.fromHex(hexEncodeNumber(1))
+    ]);
+    setPriceToken1('1');
+    setPriceToken2(amount);
+    setToken1('xEGLD');
+    setToken2(token.split('-')[0]);
+    console.log('updatePriceEgldToken', amount);
   };
 
-  const updatePriceEgldToken = (token: string) => {
-    const func = 'priceEgldToken';
-
-    const query = new Query({
-      address: new Address(contractAddress),
-      func: new ContractFunction(func),
-      args: [
+  const updatePriceTokenEgld = async (token: string) => {
+    const numerator = await myQuery(
+      contractAddress,
+      network,
+      'priceTokenEgldNumerator',
+      [
         BytesValue.fromHex(hexEncodeStr(token)),
         BytesValue.fromHex(hexEncodeNumber(1))
       ]
-    });
+    );
 
-    const proxy = new ProxyProvider(network.apiAddress);
-    proxy
-      .queryContract(query)
-      .then(({ returnData }) => {
-        const [encoded] = returnData;
-        const decoded = Buffer.from(encoded, 'base64').toString('hex');
-        const decNumber = hexDecodeNumber(decoded);
-        setToken1('xEGLD');
-        setToken2(token);
-        if (decNumber === '') {
-          setAmountToken1('0');
-          setAmountToken2('0');
-        } else {
-          setAmountToken1('1');
-          setAmountToken2(decNumber);
-        }
-      })
-      .catch((err) => {
-        console.error('Unable to call VM query', err);
-      });
-  };
-
-  const updatePriceTokenEgld = (token: string) => {
-    let func = 'priceTokenEgldNumerator';
-    let numerator = 0;
-    let denominator = 0;
-
-    const query = new Query({
-      address: new Address(contractAddress),
-      func: new ContractFunction(func),
-      args: [
+    const denominator = await myQuery(
+      contractAddress,
+      network,
+      'priceTokenEgldDenominator',
+      [
         BytesValue.fromHex(hexEncodeStr(token)),
         BytesValue.fromHex(hexEncodeNumber(1))
       ]
-    });
+    );
 
-    const proxy = new ProxyProvider(network.apiAddress);
-    proxy
-      .queryContract(query)
-      .then(({ returnData }) => {
-        const [encoded] = returnData;
-        const decoded = Buffer.from(encoded, 'base64').toString('hex');
-        const decNumber = hexDecodeNumber(decoded);
-        numerator = Number(decNumber);
+    const numeratorBig = new BigNumber(numerator, 10);
+    const denominatorBig = new BigNumber(denominator, 10);
+    const result = numeratorBig.dividedBy(denominatorBig).toFixed();
+    const resultStr = result.toString();
 
-        func = 'priceTokenEgldDenominator';
-        const query2 = new Query({
-          address: new Address(contractAddress),
-          func: new ContractFunction(func),
-          args: [
-            BytesValue.fromHex(hexEncodeStr(token)),
-            BytesValue.fromHex(hexEncodeNumber(1))
-          ]
-        });
-
-        proxy
-          .queryContract(query2)
-          .then(({ returnData }) => {
-            const [encoded] = returnData;
-            const decoded = Buffer.from(encoded, 'base64').toString('hex');
-            const decNumber = hexDecodeNumber(decoded);
-
-            denominator = Number(decNumber);
-            const result = numerator / denominator;
-            const resultRound =
-              Math.round((result + Number.EPSILON) * 10000000000000000) /
-              10000000000000000;
-            setToken1(token);
-            setToken2('xEGLD');
-            if (decNumber === '') {
-              setAmountToken1('0');
-              setAmountToken2('0');
-            } else {
-              setAmountToken1(resultRound.toString());
-              setAmountToken2('1');
-            }
-          })
-          .catch((err) => {
-            console.error('Unable to call VM query', err);
-          });
-      })
-      .catch((err) => {
-        console.error('Unable to call VM query', err);
-      });
+    setPriceToken2(resultStr);
+    if (resultStr !== '0') {
+      setPriceToken1('1');
+    } else {
+      setPriceToken1('0');
+    }
+    setToken1(token.split('-')[0]);
+    setToken2('xEGLD');
   };
 
   const updatePrice = (tk1: string, tk2: string) => {
@@ -166,62 +107,24 @@ const FormTrade = () => {
     }
   };
 
-  const updateCurrentK = (token: string) => {
-    const query = new Query({
-      address: new Address(contractAddress),
-      func: new ContractFunction('calculateK'),
-      args: [BytesValue.fromHex(hexEncodeStr(token))]
-    });
-
-    const proxy = new ProxyProvider(network.apiAddress);
-    proxy
-      .queryContract(query)
-      .then(({ returnData }) => {
-        const [encoded] = returnData;
-        const decoded = Buffer.from(encoded, 'base64').toString('hex');
-        const decNumber = hexDecodeNumber(decoded);
-
-        if (decNumber === '') {
-          setCurrentK('0');
-        } else {
-          setCurrentK(decNumber);
-        }
-      })
-      .catch((err) => {
-        console.error('Unable to call VM query', err);
-      });
+  const updateCurrentK = async (token: string) => {
+    const myCurrentK = await myQuery(contractAddress, network, 'calculateK', [
+      BytesValue.fromHex(hexEncodeStr(token))
+    ]);
+    setCurrentK(myCurrentK);
   };
 
-  const updateInitialK = (token: string) => {
-    const query = new Query({
-      address: new Address(contractAddress),
-      func: new ContractFunction('getInitialK'),
-      args: [BytesValue.fromHex(hexEncodeStr(token))]
-    });
-
-    const proxy = new ProxyProvider(network.apiAddress);
-    proxy
-      .queryContract(query)
-      .then(({ returnData }) => {
-        const [encoded] = returnData;
-        const decoded = Buffer.from(encoded, 'base64').toString('hex');
-        const decNumber = hexDecodeNumber(decoded);
-
-        if (decNumber === '') {
-          setInitialK('0');
-        } else {
-          setInitialK(decNumber);
-        }
-      })
-      .catch((err) => {
-        console.error('Unable to call VM query', err);
-      });
+  const updateInitialK = async (token: string) => {
+    const myInitialK = await myQuery(contractAddress, network, 'getInitialK', [
+      BytesValue.fromHex(hexEncodeStr(token))
+    ]);
+    setInitialK(myInitialK);
   };
 
   const updatePairs = (myAdd: string) => {
     const provider = getProvider();
-    const address = myAdd;
-    provider.getTokens(address).then((tokens) => {
+
+    provider.getTokens(myAdd).then((tokens) => {
       tokens.map(
         (i: {
           identifier: string;
@@ -249,6 +152,20 @@ const FormTrade = () => {
 
       setItemsSelect(tokens);
     });
+  };
+
+  const updateBalance = (token: string) => {
+    console.log('updateBalance', token);
+    if (token === 'xEGLD') {
+      setAmountAvailable(account.balance);
+    } else {
+      const provider = getProvider();
+      provider.getTokenData(address, token).then(({ balance }) => {
+        //setItemsSelect(tokens);
+        setAmountAvailable(balance);
+        console.log(balance);
+      });
+    }
   };
 
   const handleSubmit = (event: any) => {
@@ -290,12 +207,14 @@ const FormTrade = () => {
     const tk2 = tks[1];
 
     updatePrice(tk1, tk2);
-    if (tk1 !== 'xEGLD') {
-      updateCurrentK(tk1);
-      updateInitialK(tk1);
-    } else {
+    if (tk1 === 'xEGLD') {
       updateCurrentK(tk2);
       updateInitialK(tk2);
+      updateBalance(tk1);
+    } else {
+      updateCurrentK(tk1);
+      updateInitialK(tk1);
+      updateBalance(tk1);
     }
     // updateAmountToken(event.target.value);
     // updateEarningsToken(event.target.value);
@@ -329,7 +248,11 @@ const FormTrade = () => {
         </div>
         <div className='form-group row mb-0'>
           <label htmlFor='amount' className=''>
-            Amount (xxx):
+            Amount in wei (
+            <small>
+              1 {`${token1}`} - 1000000000000000000 wei {`${token1}`}
+            </small>
+            ):
           </label>
           <input
             className='form-control'
@@ -345,24 +268,28 @@ const FormTrade = () => {
           <div className='container text-left m-0 mt-2 p-0'>
             <div className='form-group row mt-0 mb-0'>
               <div className='col-md-12'>
-                <label htmlFor='amountToken' className='text-info'>
-                  Price:{' '}
-                  {`${amountToken1} ${token1} - ${amountToken2} ${token2}`}
-                </label>
+                <p className='text-info m-0'>
+                  <strong>Price: </strong>
+                  {`${priceToken1} ${token1} - ${priceToken2} ${token2}`}
+                </p>
+                <p className='text-info m-0'>
+                  <strong>Available: </strong>
+                  {`${amountAvailable} ${token1}`}
+                </p>
               </div>
             </div>
-            <div className='form-group row mt-0 mb-0'>
+            <div className='form-group row mt-0 mb-0 text-right'>
               <div className='col-md-12'>
-                <label htmlFor='initialK' className='text-info'>
-                  Initial K: {`${initialK}`}
-                </label>
-              </div>
-            </div>
-            <div className='form-group row mt-0 mb-0'>
-              <div className='col-md-12'>
-                <label htmlFor='currentK' className='text-info'>
-                  Current K: {`${currentK}`}
-                </label>
+                <p className='text-info m-0'>
+                  <small>
+                    <strong>Initial K:</strong> {`${initialK}`}
+                  </small>
+                </p>
+                <p className='text-info m-0'>
+                  <small>
+                    <strong>Current K:</strong> {`${currentK}`}
+                  </small>
+                </p>
               </div>
             </div>
           </div>
@@ -370,11 +297,7 @@ const FormTrade = () => {
         <div className='d-flex m-0 p-0 justify-content-center'>
           <button className='btn bg-white m-2'>
             <FontAwesomeIcon icon={faArrowDown} className='text-primary' />
-            Buy
-          </button>
-          <button className='btn bg-white m-2'>
-            <FontAwesomeIcon icon={faArrowUp} className='text-primary' />
-            Sell
+            Buy {`${token1}`}
           </button>
         </div>
       </form>

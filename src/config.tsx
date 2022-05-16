@@ -1,5 +1,5 @@
 export const contractAddress =
-  'erd1qqqqqqqqqqqqqpgqqe97sahterxyam79fa7qhj52cafqqjq8mq2q4l3d99';
+  'erd1qqqqqqqqqqqqqpgqmd2plp8mf07qrfguhsqh2y08fvhn3ky9mq2qteqxk0';
 
 export const dAppName = 'testDEX';
 

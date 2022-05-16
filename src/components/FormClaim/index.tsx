@@ -1,15 +1,16 @@
 import React from 'react';
 import { useState } from 'react';
 import { useGetNetworkConfig } from '@elrondnetwork/dapp-core';
+import { BytesValue } from '@elrondnetwork/erdjs';
 import { faArrowDown } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { contractAddress, providerAddress } from 'config';
+import { contractAddress } from 'config';
 import { hexEncodeStr } from '../../controllers/common';
 
 import {
-  CustomNetworkProvider,
-  genericQuery,
-  genericTransactions
+  getProvider,
+  myTransactions,
+  myQuery
 } from '../../controllers/myTransactions';
 
 const FormClaim = () => {
@@ -47,12 +48,6 @@ const FormClaim = () => {
     };
   }, []);
 
-  const getProvider = () => {
-    return new CustomNetworkProvider(providerAddress, {
-      timeout: 5000
-    });
-  };
-
   const updateTokens = (myAdd: string) => {
     const provider = getProvider();
     const address = myAdd;
@@ -70,43 +65,34 @@ const FormClaim = () => {
   };
 
   const updateAmountToken = async (pair: string) => {
-    genericQuery(
+    const amount = await myQuery(
       contractAddress,
       network,
       'getLiquidityToken',
-      pair,
-      setAmountToken
+      [BytesValue.fromHex(hexEncodeStr(pair))]
     );
+    setAmountToken(amount);
   };
 
   const updateAmountEgld = async (pair: string) => {
-    genericQuery(
-      contractAddress,
-      network,
-      'getLiquidityEgld',
-      pair,
-      setAmountEgld
-    );
+    const amount = await myQuery(contractAddress, network, 'getLiquidityEgld', [
+      BytesValue.fromHex(hexEncodeStr(pair))
+    ]);
+    setAmountEgld(amount);
   };
 
   const updateEarningsToken = async (pair: string) => {
-    genericQuery(
-      contractAddress,
-      network,
-      'getEarnings',
-      pair,
-      setAmountEarnToken
-    );
+    const amount = await myQuery(contractAddress, network, 'getEarnings', [
+      BytesValue.fromHex(hexEncodeStr(pair))
+    ]);
+    setAmountEarnToken(amount);
   };
 
   const updateEarningsEgld = async () => {
-    genericQuery(
-      contractAddress,
-      network,
-      'getEarnings',
-      'EGLD',
-      setAmountEarnEgld
-    );
+    const amount = await myQuery(contractAddress, network, 'getEarnings', [
+      BytesValue.fromHex(hexEncodeStr('EGLD'))
+    ]);
+    setAmountEarnEgld(amount);
   };
 
   const claimEarnings = async () => {
@@ -124,7 +110,7 @@ const FormClaim = () => {
       gasLimit: 60000000
     };
 
-    const sessionId = await genericTransactions([transaction1, transaction2]);
+    const sessionId = await myTransactions([transaction1, transaction2]);
 
     if (sessionId != null) {
       setTransactionSessionId(sessionId);
@@ -150,7 +136,7 @@ const FormClaim = () => {
       gasLimit: 60000000
     };
 
-    const sessionId = await genericTransactions([transaction1, transaction2]);
+    const sessionId = await myTransactions([transaction1, transaction2]);
 
     if (sessionId != null) {
       setTransactionSessionId(sessionId);
