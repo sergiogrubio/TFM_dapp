@@ -69,7 +69,8 @@ export const myTransactions = async (pTransactions: any[]) => {
 //     });
 // };
 
-export const myQuery = async (
+// query the smartcontract, only for methods returning a int value
+export const myQueryNum = async (
   pAddress: string,
   pNetwork: any,
   pFunction: string,

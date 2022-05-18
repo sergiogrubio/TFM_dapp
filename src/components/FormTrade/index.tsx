@@ -12,7 +12,7 @@ import { contractAddress } from 'config';
 import { hexEncodeNumber, hexEncodeStr } from '../../controllers/common';
 import {
   getProvider,
-  myQuery,
+  myQueryNum,
   myTransactions
 } from '../../controllers/myTransactions';
 
@@ -57,10 +57,15 @@ const FormTrade = () => {
   }, []);
 
   const updatePriceEgldToken = async (token: string) => {
-    const amount = await myQuery(contractAddress, network, 'priceEgldToken', [
-      BytesValue.fromHex(hexEncodeStr(token)),
-      BytesValue.fromHex(hexEncodeNumber(1))
-    ]);
+    const amount = await myQueryNum(
+      contractAddress,
+      network,
+      'priceEgldToken',
+      [
+        BytesValue.fromHex(hexEncodeStr(token)),
+        BytesValue.fromHex(hexEncodeNumber(1))
+      ]
+    );
     setPriceToken1('1');
     setPriceToken2(amount);
     setToken1('xEGLD');
@@ -68,7 +73,7 @@ const FormTrade = () => {
   };
 
   const updatePriceTokenEgld = async (token: string) => {
-    const numerator = await myQuery(
+    const numerator = await myQueryNum(
       contractAddress,
       network,
       'priceTokenEgldNumerator',
@@ -78,7 +83,7 @@ const FormTrade = () => {
       ]
     );
 
-    const denominator = await myQuery(
+    const denominator = await myQueryNum(
       contractAddress,
       network,
       'priceTokenEgldDenominator',
@@ -114,16 +119,22 @@ const FormTrade = () => {
   };
 
   const updateCurrentK = async (token: string) => {
-    const myCurrentK = await myQuery(contractAddress, network, 'calculateK', [
-      BytesValue.fromHex(hexEncodeStr(token))
-    ]);
+    const myCurrentK = await myQueryNum(
+      contractAddress,
+      network,
+      'calculateK',
+      [BytesValue.fromHex(hexEncodeStr(token))]
+    );
     setCurrentK(myCurrentK);
   };
 
   const updateInitialK = async (token: string) => {
-    const myInitialK = await myQuery(contractAddress, network, 'getInitialK', [
-      BytesValue.fromHex(hexEncodeStr(token))
-    ]);
+    const myInitialK = await myQueryNum(
+      contractAddress,
+      network,
+      'getInitialK',
+      [BytesValue.fromHex(hexEncodeStr(token))]
+    );
     setInitialK(myInitialK);
   };
 

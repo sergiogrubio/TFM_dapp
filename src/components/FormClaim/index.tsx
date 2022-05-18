@@ -10,7 +10,7 @@ import { hexEncodeStr } from '../../controllers/common';
 import {
   getProvider,
   myTransactions,
-  myQuery
+  myQueryNum
 } from '../../controllers/myTransactions';
 
 const FormClaim = () => {
@@ -65,7 +65,7 @@ const FormClaim = () => {
   };
 
   const updateAmountToken = async (pair: string) => {
-    const amount = await myQuery(
+    const amount = await myQueryNum(
       contractAddress,
       network,
       'getLiquidityToken',
@@ -75,21 +75,24 @@ const FormClaim = () => {
   };
 
   const updateAmountEgld = async (pair: string) => {
-    const amount = await myQuery(contractAddress, network, 'getLiquidityEgld', [
-      BytesValue.fromHex(hexEncodeStr(pair))
-    ]);
+    const amount = await myQueryNum(
+      contractAddress,
+      network,
+      'getLiquidityEgld',
+      [BytesValue.fromHex(hexEncodeStr(pair))]
+    );
     setAmountEgld(amount);
   };
 
   const updateEarningsToken = async (pair: string) => {
-    const amount = await myQuery(contractAddress, network, 'getEarnings', [
+    const amount = await myQueryNum(contractAddress, network, 'getEarnings', [
       BytesValue.fromHex(hexEncodeStr(pair))
     ]);
     setAmountEarnToken(amount);
   };
 
   const updateEarningsEgld = async () => {
-    const amount = await myQuery(contractAddress, network, 'getEarnings', [
+    const amount = await myQueryNum(contractAddress, network, 'getEarnings', [
       BytesValue.fromHex(hexEncodeStr('EGLD'))
     ]);
     setAmountEarnEgld(amount);

@@ -12,7 +12,7 @@ import { hexEncodeStr, hexEncodeNumber } from '../../controllers/common';
 import {
   getProvider,
   myTransactions,
-  myQuery
+  myQueryNum
 } from '../../controllers/myTransactions';
 const FormFund = () => {
   const [fundData, setFundData] = useState({
@@ -64,7 +64,7 @@ const FormFund = () => {
   };
 
   const updateFundedToken = async (token: string) => {
-    const amount = await myQuery(
+    const amount = await myQueryNum(
       contractAddress,
       network,
       'getLiquidityToken',
@@ -74,9 +74,12 @@ const FormFund = () => {
   };
 
   const updateFundedEgld = async (token: string) => {
-    const amount = await myQuery(contractAddress, network, 'getLiquidityEgld', [
-      BytesValue.fromHex(hexEncodeStr(token))
-    ]);
+    const amount = await myQueryNum(
+      contractAddress,
+      network,
+      'getLiquidityEgld',
+      [BytesValue.fromHex(hexEncodeStr(token))]
+    );
     setAmountFundedEgld(amount);
   };
 
