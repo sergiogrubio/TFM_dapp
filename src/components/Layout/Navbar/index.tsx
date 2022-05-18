@@ -48,20 +48,6 @@ const Navbar = (props: NavBarProps) => {
             <NavItem>
               <button
                 className={
-                  current == 'Fund'
-                    ? 'btn btn-link bg-secondary'
-                    : 'btn btn-link'
-                }
-                onClick={handleFund}
-              >
-                Fund
-              </button>
-            </NavItem>
-          )}
-          {isLoggedIn && (
-            <NavItem>
-              <button
-                className={
                   current == 'Claim'
                     ? 'btn btn-link bg-secondary'
                     : 'btn btn-link'
@@ -69,6 +55,20 @@ const Navbar = (props: NavBarProps) => {
                 onClick={handleClaim}
               >
                 Claim
+              </button>
+            </NavItem>
+          )}
+          {isLoggedIn && (
+            <NavItem>
+              <button
+                className={
+                  current == 'Fund'
+                    ? 'btn btn-link bg-secondary'
+                    : 'btn btn-link'
+                }
+                onClick={handleFund}
+              >
+                Fund
               </button>
             </NavItem>
           )}
