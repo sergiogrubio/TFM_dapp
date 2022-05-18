@@ -14,21 +14,32 @@ const Navbar = (props: NavBarProps) => {
   const { address } = useGetAccountInfo();
   const { current } = props;
 
+  const handleClick = (event: any) => {
+    const option = event.target.innerText.toLowerCase();
+    window.location.href = `${window.location.origin}/${option}`;
+    // you are required to autenticate again
+    // logout(`${window.location.origin}/${option}`);
+  };
+
   const handleLogout = () => {
     logout(`${window.location.origin}`);
   };
 
-  const handleFund = () => {
-    logout(`${window.location.origin}/fund`);
-  };
+  // const handleFund = () => {
+  //   logout(`${window.location.origin}/fund`);
+  // };
 
-  const handleClaim = () => {
-    logout(`${window.location.origin}/claim`);
-  };
+  // const handleClaim = () => {
+  //   logout(`${window.location.origin}/claim`);
+  // };
 
-  const handleTrade = () => {
-    logout(`${window.location.origin}/trade`);
-  };
+  // const handleTrade = () => {
+  //   logout(`${window.location.origin}/trade`);
+  // };
+
+  // const handlesetPriceToken2 = () => {
+  //   logout(`${window.location.origin}/stats`);
+  // };
 
   const isLoggedIn = Boolean(address);
 
@@ -52,7 +63,7 @@ const Navbar = (props: NavBarProps) => {
                     ? 'btn btn-link bg-secondary'
                     : 'btn btn-link'
                 }
-                onClick={handleClaim}
+                onClick={handleClick}
               >
                 Claim
               </button>
@@ -66,7 +77,7 @@ const Navbar = (props: NavBarProps) => {
                     ? 'btn btn-link bg-secondary'
                     : 'btn btn-link'
                 }
-                onClick={handleFund}
+                onClick={handleClick}
               >
                 Fund
               </button>
@@ -80,7 +91,7 @@ const Navbar = (props: NavBarProps) => {
                     ? 'btn btn-link bg-secondary'
                     : 'btn btn-link'
                 }
-                onClick={handleTrade}
+                onClick={handleClick}
               >
                 Trade
               </button>

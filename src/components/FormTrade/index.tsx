@@ -10,7 +10,11 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import BigNumber from 'bignumber.js';
 import { contractAddress } from 'config';
 import { hexEncodeNumber, hexEncodeStr } from '../../controllers/common';
-import { getProvider, myQuery } from '../../controllers/myTransactions';
+import {
+  getProvider,
+  myQuery,
+  myTransactions
+} from '../../controllers/myTransactions';
 
 const FormTrade = () => {
   const [priceToken1, setPriceToken1] = useState('');
@@ -29,6 +33,9 @@ const FormTrade = () => {
   const [currentK, setCurrentK] = useState('0');
   const { network } = useGetNetworkConfig();
   const { address, account } = useGetAccountInfo();
+  const /*transactionSessionId*/ [, setTransactionSessionId] = React.useState<
+      string | null
+    >(null);
 
   // run it only for a single time to load the amount available of the first pair
   // variable 'ignore' is a trick to achieve that goal
@@ -58,7 +65,6 @@ const FormTrade = () => {
     setPriceToken2(amount);
     setToken1('xEGLD');
     setToken2(token.split('-')[0]);
-    console.log('updatePriceEgldToken', amount);
   };
 
   const updatePriceTokenEgld = async (token: string) => {
@@ -155,7 +161,6 @@ const FormTrade = () => {
   };
 
   const updateBalance = (token: string) => {
-    console.log('updateBalance', token);
     if (token === 'xEGLD') {
       setAmountAvailable(account.balance);
     } else {
@@ -163,44 +168,83 @@ const FormTrade = () => {
       provider.getTokenData(address, token).then(({ balance }) => {
         //setItemsSelect(tokens);
         setAmountAvailable(balance);
-        console.log(balance);
       });
     }
   };
 
   const handleSubmit = (event: any) => {
     event.preventDefault();
-    // this works because names of tokens are built only with alphanumerics chars
-    const btn = document.activeElement;
+
     const tks = tradeData.pair.toString().split(',');
+    const amount = tradeData.amount;
     const tk1 = tks[0];
     const tk2 = tks[1];
-    switch (btn?.textContent) {
-      case 'Buy': {
-        console.log(`buy ${tk1} with ${tk2}`);
-        break;
-      }
-      case 'Sell': {
-        console.log(`buy ${tk2} with ${tk1}`);
-        break;
-      }
-      default: {
-        // trans();
-        break;
-      }
+
+    if (tk1 === 'xEGLD') {
+      // Buy EGLD with token, egld_to_token
+      egldToToken(amount, tk2, contractAddress, 60000000);
+    } else {
+      // Buy token with EGLD, token_to_egld
+      tokenToEgld(amount, tk1, contractAddress, 60000000);
+    }
+  };
+
+  const egldToToken = async (
+    pValue: number,
+    pToken: string,
+    pAddress: string,
+    pGas: number
+  ) => {
+    const transaction = {
+      value: pValue,
+      data: 'egldToToken' + '@' + hexEncodeStr(pToken),
+      receiver: pAddress,
+      gasLimit: pGas
+    };
+    const sessionId = await myTransactions([transaction]);
+
+    if (sessionId != null) {
+      setTransactionSessionId(sessionId);
+    } else {
+      console.log('egldToToken error sessionId = null');
+    }
+  };
+
+  const tokenToEgld = async (
+    pValue: number,
+    pToken: string,
+    pAddress: string,
+    pGas: number
+  ) => {
+    const transaction = {
+      value: '0',
+      data:
+        'ESDTTransfer' +
+        '@' + // token identifier in hexadecimal encoding
+        hexEncodeStr(pToken) +
+        '@' + // value to transfer in hexadecimal encoding
+        hexEncodeNumber(pValue) +
+        '@' + // name of method to call in hexadecimal encoding
+        hexEncodeStr('tokenToEgld'),
+      receiver: pAddress,
+      gasLimit: pGas
+    };
+
+    const sessionId = await myTransactions([transaction]);
+
+    if (sessionId != null) {
+      setTransactionSessionId(sessionId);
+    } else {
+      console.log('tokenToEgld error sessionId = null');
     }
   };
 
   // TODO: change "any"
-  const handleInputChange = (event: any) => {
+  const handleInputChangeSelect = (event: any) => {
     setTradeData({
       ...tradeData,
       [event.target.name]: event.target.value
     });
-    // problem: now tradeData.pair is the value before
-    // and event.target.value the new value
-    // when you submit the for values are OK, but not now
-    // so a solve it in a way I don't like...
 
     const tks = event.target.value.toString().split(',');
     const tk1 = tks[0];
@@ -216,9 +260,13 @@ const FormTrade = () => {
       updateInitialK(tk1);
       updateBalance(tk1);
     }
-    // updateAmountToken(event.target.value);
-    // updateEarningsToken(event.target.value);
-    // updateEarningsEgld(event.target.value);
+  };
+
+  const handleInputChange = (event: any) => {
+    setTradeData({
+      ...tradeData,
+      [event.target.name]: event.target.value
+    });
   };
 
   return (
@@ -232,7 +280,7 @@ const FormTrade = () => {
             className='form-control'
             id='pair'
             name='pair'
-            onChange={handleInputChange}
+            onChange={handleInputChangeSelect}
             placeholder='select a pair'
             required
           >
@@ -263,6 +311,7 @@ const FormTrade = () => {
             max='100000000000000000000'
             id='amount'
             name='amount'
+            onChange={handleInputChange}
             required
           />
           <div className='container text-left m-0 mt-2 p-0'>
