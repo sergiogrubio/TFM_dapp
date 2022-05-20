@@ -4,3 +4,5 @@ export const contractAddress =
 export const dAppName = 'testDEX';
 
 export const providerAddress = 'https://devnet-api.elrond.com';
+
+export const environment = 'devnet';

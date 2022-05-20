@@ -7,7 +7,7 @@ import {
 } from '@elrondnetwork/dapp-core';
 import { Route, Routes, BrowserRouter as Router } from 'react-router-dom';
 import Layout from 'components/Layout';
-// import Fund from 'pages/Fund';
+import { environment } from 'config';
 import PageNotFound from 'pages/PageNotFound';
 import { routeNames } from 'routes';
 import routes from 'routes';
@@ -16,8 +16,6 @@ import routes from 'routes';
 // import '@elrondnetwork/dapp-core/build/index.css';
 // I copied that file to dapp-core.css
 import './dapp-core.css';
-
-const environment = 'devnet';
 
 const {
   TransactionsToastList,
