@@ -67,3 +67,5 @@ Elrond dApp Template was implemented by The [Elrond Team](https://elrond.com/tea
 ## The thesis
 
 You can find [the thesis of the project also on Github](https://github.com/sergiogrubio/TFM_latex) (but I wrote it in catalan, I think it is the first Elrond project using this language).
+
+Finally, you may want to see a repo with a [script to test Elrond's network performance](https://github.com/sergiogrubio/TFM_stats).
