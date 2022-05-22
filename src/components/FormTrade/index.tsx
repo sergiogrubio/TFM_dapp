@@ -17,11 +17,14 @@ import {
 } from '../../controllers/myTransactions';
 
 const FormTrade = () => {
-  const [priceToken1, setPriceToken1] = useState('');
   const [token1, setToken1] = useState('');
-  const [priceToken2, setPriceToken2] = useState('');
-  const [amountAvailable, setAmountAvailable] = useState('');
   const [token2, setToken2] = useState('');
+  const [priceToken1, setPriceToken1] = useState('');
+  const [priceToken2, setPriceToken2] = useState('');
+  const [amountAvailableTk1, setAmountAvailableTk1] = useState('');
+  const [amountAvailableTk2, setAmountAvailableTk2] = useState('');
+  const [amountAvailablePoolTk1, setAmountAvailablePoolTk1] = useState('');
+  const [amountAvailablePoolTk2, setAmountAvailablePoolTk2] = useState('');
   const [itemsSelect, setItemsSelect] = useState([
     { identifier: '', name: 'select a pair', value1: '', value2: '' }
   ]);
@@ -67,75 +70,127 @@ const FormTrade = () => {
       ]
     );
     setPriceToken1('1');
-    setPriceToken2(amount);
     setToken1('xEGLD');
     setToken2(token.split('-')[0]);
+
+    if (amount !== '0') {
+      setPriceToken2(amount);
+    } else {
+      const numerator = await myQueryNum(
+        contractAddress,
+        network,
+        'priceEgldTokenNumerator',
+        [
+          BytesValue.fromHex(hexEncodeStr(token)),
+          BytesValue.fromHex(hexEncodeNumber(1))
+        ]
+      );
+      const denominator = await myQueryNum(
+        contractAddress,
+        network,
+        'priceEgldTokenDenominator',
+        [
+          BytesValue.fromHex(hexEncodeStr(token)),
+          BytesValue.fromHex(hexEncodeNumber(1))
+        ]
+      );
+      const resultStr = bigIntDiv(numerator, denominator);
+      setPriceToken2(resultStr);
+    }
   };
 
   const updatePriceTokenEgld = async (token: string) => {
-    const numerator = await myQueryNum(
+    const amount = await myQueryNum(
       contractAddress,
       network,
-      'priceTokenEgldNumerator',
+      'priceTokenEgld',
       [
         BytesValue.fromHex(hexEncodeStr(token)),
         BytesValue.fromHex(hexEncodeNumber(1))
       ]
     );
+    setPriceToken1('1');
+    setToken1('xEGLD');
+    setToken2(token.split('-')[0]);
 
-    const denominator = await myQueryNum(
-      contractAddress,
-      network,
-      'priceTokenEgldDenominator',
-      [
-        BytesValue.fromHex(hexEncodeStr(token)),
-        BytesValue.fromHex(hexEncodeNumber(1))
-      ]
-    );
+    if (amount !== '0') {
+      setPriceToken2(amount);
+    } else {
+      const numerator = await myQueryNum(
+        contractAddress,
+        network,
+        'priceTokenEgldNumerator',
+        [
+          BytesValue.fromHex(hexEncodeStr(token)),
+          BytesValue.fromHex(hexEncodeNumber(1))
+        ]
+      );
 
+      const denominator = await myQueryNum(
+        contractAddress,
+        network,
+        'priceTokenEgldDenominator',
+        [
+          BytesValue.fromHex(hexEncodeStr(token)),
+          BytesValue.fromHex(hexEncodeNumber(1))
+        ]
+      );
+      const numeratorBig = new BigNumber(numerator, 10);
+      const denominatorBig = new BigNumber(denominator, 10);
+      const result = numeratorBig.dividedBy(denominatorBig).toFixed();
+      const resultStr = result.toString();
+
+      setPriceToken2(resultStr);
+      if (resultStr !== '0') {
+        setPriceToken1('1');
+      } else {
+        setPriceToken1('0');
+      }
+      setToken1(token.split('-')[0]);
+      setToken2('xEGLD');
+    }
+  };
+
+  const bigIntDiv = (numerator: string, denominator: string) => {
     const numeratorBig = new BigNumber(numerator, 10);
     const denominatorBig = new BigNumber(denominator, 10);
     const result = numeratorBig.dividedBy(denominatorBig).toFixed();
-    const resultStr = result.toString();
-
-    setPriceToken2(resultStr);
-    if (resultStr !== '0') {
-      setPriceToken1('1');
-    } else {
-      setPriceToken1('0');
-    }
-    setToken1(token.split('-')[0]);
-    setToken2('xEGLD');
+    return result.toString();
   };
 
   const updatePrice = (tk1: string, tk2: string) => {
     if (tk1 === 'xEGLD') {
       updatePriceEgldToken(tk2);
-    } else if (tk2 === 'xEGLD') {
-      updatePriceTokenEgld(tk1);
     } else {
-      console.log('Something went wrong');
+      updatePriceTokenEgld(tk1);
     }
   };
 
+  const queryFunc = async (token: string, func: string) => {
+    const answer = await myQueryNum(contractAddress, network, func, [
+      BytesValue.fromHex(hexEncodeStr(token))
+    ]);
+    return answer;
+  };
+
   const updateCurrentK = async (token: string) => {
-    const myCurrentK = await myQueryNum(
-      contractAddress,
-      network,
-      'calculateK',
-      [BytesValue.fromHex(hexEncodeStr(token))]
-    );
+    const myCurrentK = await queryFunc(token, 'calculateK');
     setCurrentK(myCurrentK);
   };
 
   const updateInitialK = async (token: string) => {
-    const myInitialK = await myQueryNum(
-      contractAddress,
-      network,
-      'getInitialK',
-      [BytesValue.fromHex(hexEncodeStr(token))]
-    );
+    const myInitialK = await queryFunc(token, 'getInitialK');
     setInitialK(myInitialK);
+  };
+
+  const updateAmountToken = async (token: string, setter: any) => {
+    const myAmountToken = await queryFunc(token, 'getLiquidityToken');
+    setter(myAmountToken);
+  };
+
+  const updateAmountEgld = async (token: string, setter: any) => {
+    const myAmountEgld = await queryFunc(token, 'getLiquidityEgld');
+    setter(myAmountEgld);
   };
 
   const updatePairs = (myAdd: string) => {
@@ -171,14 +226,23 @@ const FormTrade = () => {
     });
   };
 
-  const updateBalance = (token: string) => {
-    if (token === 'xEGLD') {
-      setAmountAvailable(account.balance);
-    } else {
-      const provider = getProvider();
-      provider.getTokenData(address, token).then(({ balance }) => {
+  const updateBalance = (pToken1: string, pToken2: string) => {
+    const provider = getProvider();
+    if (pToken1 === 'xEGLD') {
+      provider.getTokenData(address, pToken2).then(({ balance }) => {
         //setItemsSelect(tokens);
-        setAmountAvailable(balance);
+        setAmountAvailableTk1(account.balance);
+        setAmountAvailableTk2(balance);
+        updateAmountEgld(pToken2, setAmountAvailablePoolTk1);
+        updateAmountToken(pToken2, setAmountAvailablePoolTk2);
+      });
+    } else {
+      provider.getTokenData(address, pToken1).then(({ balance }) => {
+        //setItemsSelect(tokens);
+        setAmountAvailableTk1(balance);
+        setAmountAvailableTk2(account.balance);
+        updateAmountEgld(pToken1, setAmountAvailablePoolTk2);
+        updateAmountToken(pToken1, setAmountAvailablePoolTk1);
       });
     }
   };
@@ -193,14 +257,14 @@ const FormTrade = () => {
 
     if (tk1 === 'xEGLD') {
       // Buy EGLD with token, egld_to_token
-      egldToToken(amount, tk2, contractAddress, 60000000);
+      swapEgldForToken(amount, tk2, contractAddress, 60000000);
     } else {
       // Buy token with EGLD, token_to_egld
-      tokenToEgld(amount, tk1, contractAddress, 60000000);
+      swapTokenForEgld(amount, tk1, contractAddress, 60000000);
     }
   };
 
-  const egldToToken = async (
+  const swapTokenForEgld = async (
     pValue: number,
     pToken: string,
     pAddress: string,
@@ -208,7 +272,7 @@ const FormTrade = () => {
   ) => {
     const transaction = {
       value: pValue,
-      data: 'egldToToken' + '@' + hexEncodeStr(pToken),
+      data: 'swapTokenForEgld' + '@' + hexEncodeStr(pToken),
       receiver: pAddress,
       gasLimit: pGas
     };
@@ -217,11 +281,11 @@ const FormTrade = () => {
     if (sessionId != null) {
       setTransactionSessionId(sessionId);
     } else {
-      console.log('egldToToken error sessionId = null');
+      console.log('swapTokenForEgld error sessionId = null');
     }
   };
 
-  const tokenToEgld = async (
+  const swapEgldForToken = async (
     pValue: number,
     pToken: string,
     pAddress: string,
@@ -236,7 +300,7 @@ const FormTrade = () => {
         '@' + // value to transfer in hexadecimal encoding
         hexEncodeNumber(pValue) +
         '@' + // name of method to call in hexadecimal encoding
-        hexEncodeStr('tokenToEgld'),
+        hexEncodeStr('swapEgldForToken'),
       receiver: pAddress,
       gasLimit: pGas
     };
@@ -246,7 +310,7 @@ const FormTrade = () => {
     if (sessionId != null) {
       setTransactionSessionId(sessionId);
     } else {
-      console.log('tokenToEgld error sessionId = null');
+      console.log('swapEgldForToken error sessionId = null');
     }
   };
 
@@ -258,18 +322,33 @@ const FormTrade = () => {
     });
 
     const tks = event.target.value.toString().split(',');
-    const tk1 = tks[0];
-    const tk2 = tks[1];
+    if (tks.length > 1) {
+      const tk1 = tks[0];
+      const tk2 = tks[1];
 
-    updatePrice(tk1, tk2);
-    if (tk1 === 'xEGLD') {
-      updateCurrentK(tk2);
-      updateInitialK(tk2);
-      updateBalance(tk1);
+      updatePrice(tk1, tk2);
+
+      if (tk1 === 'xEGLD') {
+        updateCurrentK(tk2);
+        updateInitialK(tk2);
+
+        // updateBalance(tk1, tk2);
+      } else {
+        updateCurrentK(tk1);
+        updateInitialK(tk1);
+
+        // updateBalance(tk2, tk1);
+      }
+      updateBalance(tk1, tk2);
     } else {
-      updateCurrentK(tk1);
-      updateInitialK(tk1);
-      updateBalance(tk1);
+      setToken1('');
+      setPriceToken1('');
+      setAmountAvailableTk1('');
+      setToken2('');
+      setPriceToken2('');
+      setAmountAvailableTk2('');
+      setInitialK('0');
+      setCurrentK('0');
     }
   };
 
@@ -282,6 +361,7 @@ const FormTrade = () => {
 
   return (
     <>
+      <h4 className='mb-3 font-weight-normal text-light'>Swap tokens</h4>
       <form className='' onSubmit={handleSubmit}>
         <div className='form-group row'>
           <label htmlFor='token' className=''>
@@ -307,9 +387,9 @@ const FormTrade = () => {
         </div>
         <div className='form-group row mb-0'>
           <label htmlFor='amount' className=''>
-            Amount in wei (
+            Amount of {token2} in wei (
             <small>
-              1 {`${token1}`} - 1000000000000000000 wei {`${token1}`}
+              1 {`${token2}`} - 1000000000000000000 wei {`${token2}`}
             </small>
             ):
           </label>
@@ -319,7 +399,7 @@ const FormTrade = () => {
             placeholder='x1000000'
             step='1000000'
             min='0'
-            max='100000000000000000000'
+            max='100000000000000000000000000000000000000000000'
             id='amount'
             name='amount'
             onChange={handleInputChange}
@@ -333,9 +413,15 @@ const FormTrade = () => {
                   {`${priceToken1} ${token1} - ${priceToken2} ${token2}`}
                 </p>
                 <p className='text-info m-0'>
-                  <strong>Available: </strong>
-                  {`${amountAvailable} ${token1}`}
+                  <strong>Pool (amount available): </strong>
                 </p>
+                <p className='text-info m-0'>{`${amountAvailablePoolTk1} ${token1}`}</p>
+                <p className='text-info m-0'>{`${amountAvailablePoolTk2} ${token2}`}</p>
+                <p className='text-info m-0'>
+                  <strong>Your wallet (amount available):</strong>
+                </p>
+                <p className='text-info m-0'>{`${amountAvailableTk1} ${token1}`}</p>
+                <p className='text-info m-0'>{`${amountAvailableTk2} ${token2}`}</p>
               </div>
             </div>
             <div className='form-group row mt-0 mb-0 text-right'>
@@ -357,7 +443,7 @@ const FormTrade = () => {
         <div className='d-flex m-0 p-0 justify-content-center'>
           <button className='btn bg-white m-2'>
             <FontAwesomeIcon icon={faArrowDown} className='text-primary' />
-            Buy {`${token1}`}
+            Buy {token1} with {token2}
           </button>
         </div>
       </form>

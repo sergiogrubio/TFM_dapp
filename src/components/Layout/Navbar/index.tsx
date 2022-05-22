@@ -2,7 +2,7 @@ import React from 'react';
 import { logout, useGetAccountInfo } from '@elrondnetwork/dapp-core';
 import { Navbar as BsNavbar, NavItem, Nav } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
-import { dAppName } from 'config';
+import { dAppName, environment } from 'config';
 import { routeNames } from 'routes';
 import { ReactComponent as ElrondLogo } from './../../../assets/img/elrond.svg';
 
@@ -51,7 +51,9 @@ const Navbar = (props: NavBarProps) => {
           to={isLoggedIn ? routeNames.trade : routeNames.home}
         >
           <ElrondLogo className='elrond-logo' />
-          <span className='dapp-name text-muted'>{dAppName}</span>
+          <span className='dapp-name text-muted'>
+            {dAppName} - {environment}
+          </span>
         </Link>
 
         <Nav className='ml-auto'>
