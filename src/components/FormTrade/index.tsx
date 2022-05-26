@@ -1,6 +1,7 @@
 import React from 'react';
 import { useState } from 'react';
 import {
+  DappUI,
   useGetNetworkConfig,
   useGetAccountInfo
 } from '@elrondnetwork/dapp-core';
@@ -8,7 +9,7 @@ import { BytesValue } from '@elrondnetwork/erdjs';
 import { faArrowDown } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import BigNumber from 'bignumber.js';
-import { contractAddress } from 'config';
+import { contractAddress, numDecimals } from 'config';
 import { hexEncodeNumber, hexEncodeStr } from '../../controllers/common';
 import {
   getProvider,
@@ -19,8 +20,7 @@ import {
 const FormTrade = () => {
   const [token1, setToken1] = useState('');
   const [token2, setToken2] = useState('');
-  const [priceToken1, setPriceToken1] = useState('');
-  const [priceToken2, setPriceToken2] = useState('');
+  const [amountTransaction, setAmountTransaction] = useState('');
   const [amountAvailableTk1, setAmountAvailableTk1] = useState('');
   const [amountAvailableTk2, setAmountAvailableTk2] = useState('');
   const [amountAvailablePoolTk1, setAmountAvailablePoolTk1] = useState('');
@@ -59,110 +59,101 @@ const FormTrade = () => {
     };
   }, []);
 
-  const updatePriceEgldToken = async (token: string) => {
-    const amount = await myQueryNum(
+  const updatePriceEgldToken = async (
+    token: string,
+    amount: number | string
+  ) => {
+    const numerator = await myQueryNum(
       contractAddress,
       network,
-      'priceEgldToken',
+      'priceEgldTokenNoFeeNumerator',
       [
         BytesValue.fromHex(hexEncodeStr(token)),
-        BytesValue.fromHex(hexEncodeNumber(1))
+        BytesValue.fromHex(hexEncodeNumber(amount))
       ]
     );
-    setPriceToken1('1');
-    setToken1('xEGLD');
-    setToken2(token.split('-')[0]);
 
-    if (amount !== '0') {
-      setPriceToken2(amount);
-    } else {
-      const numerator = await myQueryNum(
-        contractAddress,
-        network,
-        'priceEgldTokenNumerator',
-        [
-          BytesValue.fromHex(hexEncodeStr(token)),
-          BytesValue.fromHex(hexEncodeNumber(1))
-        ]
-      );
-      const denominator = await myQueryNum(
-        contractAddress,
-        network,
-        'priceEgldTokenDenominator',
-        [
-          BytesValue.fromHex(hexEncodeStr(token)),
-          BytesValue.fromHex(hexEncodeNumber(1))
-        ]
-      );
-      const resultStr = bigIntDiv(numerator, denominator);
-      setPriceToken2(resultStr);
-    }
+    const denominator = await myQueryNum(
+      contractAddress,
+      network,
+      'priceEgldTokenNoFeeDenominator',
+      [
+        BytesValue.fromHex(hexEncodeStr(token)),
+        BytesValue.fromHex(hexEncodeNumber(amount))
+      ]
+    );
+    const resultStr = bigIntDiv(numerator, denominator);
+    setAmountTransaction(resultStr);
+    console.log(
+      'updatePriceEgldToken',
+      amountTransaction,
+      resultStr,
+      numerator,
+      denominator
+    );
+
+    // setToken1('xEGLD');
+    // setToken2(token.split('-')[0]);
   };
 
-  const updatePriceTokenEgld = async (token: string) => {
-    const amount = await myQueryNum(
+  const updatePriceTokenEgld = async (
+    token: string,
+    amount: number | string
+  ) => {
+    const numerator = await myQueryNum(
       contractAddress,
       network,
-      'priceTokenEgld',
+      'priceTokenEgldNoFeeNumerator',
       [
         BytesValue.fromHex(hexEncodeStr(token)),
-        BytesValue.fromHex(hexEncodeNumber(1))
+        BytesValue.fromHex(hexEncodeNumber(amount))
       ]
     );
-    setPriceToken1('1');
-    setToken1('xEGLD');
-    setToken2(token.split('-')[0]);
 
-    if (amount !== '0') {
-      setPriceToken2(amount);
-    } else {
-      const numerator = await myQueryNum(
-        contractAddress,
-        network,
-        'priceTokenEgldNumerator',
-        [
-          BytesValue.fromHex(hexEncodeStr(token)),
-          BytesValue.fromHex(hexEncodeNumber(1))
-        ]
-      );
+    const denominator = await myQueryNum(
+      contractAddress,
+      network,
+      'priceTokenEgldNoFeeDenominator',
+      [
+        BytesValue.fromHex(hexEncodeStr(token)),
+        BytesValue.fromHex(hexEncodeNumber(amount))
+      ]
+    );
 
-      const denominator = await myQueryNum(
-        contractAddress,
-        network,
-        'priceTokenEgldDenominator',
-        [
-          BytesValue.fromHex(hexEncodeStr(token)),
-          BytesValue.fromHex(hexEncodeNumber(1))
-        ]
-      );
-      const numeratorBig = new BigNumber(numerator, 10);
-      const denominatorBig = new BigNumber(denominator, 10);
-      const result = numeratorBig.dividedBy(denominatorBig).toFixed();
-      const resultStr = result.toString();
+    const resultStr = bigIntDiv(numerator, denominator);
+    setAmountTransaction(resultStr);
+    console.log(
+      'updatePriceTokenEgld',
+      amountTransaction,
+      resultStr,
+      numerator,
+      denominator
+    );
 
-      setPriceToken2(resultStr);
-      if (resultStr !== '0') {
-        setPriceToken1('1');
-      } else {
-        setPriceToken1('0');
-      }
-      setToken1(token.split('-')[0]);
-      setToken2('xEGLD');
-    }
+    // setToken1(token.split('-')[0]);
+    // setToken2('xEGLD');
   };
 
   const bigIntDiv = (numerator: string, denominator: string) => {
     const numeratorBig = new BigNumber(numerator, 10);
     const denominatorBig = new BigNumber(denominator, 10);
-    const result = numeratorBig.dividedBy(denominatorBig).toFixed();
+    const result = numeratorBig.dividedBy(denominatorBig).toFixed(0);
     return result.toString();
   };
 
-  const updatePrice = (tk1: string, tk2: string) => {
-    if (tk1 === 'xEGLD') {
-      updatePriceEgldToken(tk2);
+  const updateAmount = (pToken1: string, pToken2: string, pAmount: number) => {
+    // converting to int
+    const num = new BigNumber(`${pAmount}e+${numDecimals}`, 10);
+    const amount = num.toString();
+
+    if (pToken1 === 'xEGLD') {
+      console.log('updatePriceEgldToken', pToken2, amount);
+      // get how many tokens I need to get 1 EGLD
+      updatePriceEgldToken(pToken2, amount);
     } else {
-      updatePriceTokenEgld(tk1);
+      console.log('updatePriceTokenEgld', pToken1, amount);
+      // get how many EGLD I need to get 1 token
+      updatePriceTokenEgld(pToken1, amount);
     }
   };
 
@@ -228,6 +219,10 @@ const FormTrade = () => {
 
   const updateBalance = (pToken1: string, pToken2: string) => {
     const provider = getProvider();
+    setAmountAvailableTk1('');
+    setAmountAvailableTk2('');
+    setAmountAvailablePoolTk1('');
+    setAmountAvailablePoolTk2('');
     if (pToken1 === 'xEGLD') {
       provider.getTokenData(address, pToken2).then(({ balance }) => {
         //setItemsSelect(tokens);
@@ -320,13 +315,25 @@ const FormTrade = () => {
       ...tradeData,
       [event.target.name]: event.target.value
     });
-
+    const amount = tradeData.amount;
     const tks = event.target.value.toString().split(',');
+    // setToken1('');
+    // setPriceToken1('');
+    // setAmountAvailableTk1('');
+    // setToken2('');
+    // setPriceToken2('');
+    // setAmountAvailableTk2('');
+    // setInitialK('0');
+    // setCurrentK('0');
+
     if (tks.length > 1) {
       const tk1 = tks[0];
       const tk2 = tks[1];
 
-      updatePrice(tk1, tk2);
+      setToken1(tk1);
+      setToken2(tk2);
+
+      updateAmount(tk1, tk2, amount);
 
       if (tk1 === 'xEGLD') {
         updateCurrentK(tk2);
@@ -336,19 +343,9 @@ const FormTrade = () => {
       } else {
         updateCurrentK(tk1);
         updateInitialK(tk1);
-
         // updateBalance(tk2, tk1);
       }
       updateBalance(tk1, tk2);
-    } else {
-      setToken1('');
-      setPriceToken1('');
-      setAmountAvailableTk1('');
-      setToken2('');
-      setPriceToken2('');
-      setAmountAvailableTk2('');
-      setInitialK('0');
-      setCurrentK('0');
     }
   };
 
@@ -357,6 +354,8 @@ const FormTrade = () => {
       ...tradeData,
       [event.target.name]: event.target.value
     });
+    const tks = tradeData.pair.toString().split(',');
+    updateAmount(tks[0], tks[1], event.target.value);
   };
 
   return (
@@ -387,21 +386,14 @@ const FormTrade = () => {
         </div>
         <div className='form-group row mb-0'>
           <label htmlFor='amount' className=''>
-            Amount of {token2} in wei (
-            <small>
-              1 {`${token2}`} - 1000000000000000000 wei {`${token2}`}
-            </small>
-            ):
+            Amount of {token2.split('-')[0]}:
           </label>
           <input
             className='form-control'
             type='number'
-            placeholder='x1000000'
-            step='1000000'
-            min='0'
-            max='100000000000000000000000000000000000000000000'
-            id='amount'
             name='amount'
+            min='1'
+            step='any'
             onChange={handleInputChange}
             required
           />
@@ -409,19 +401,43 @@ const FormTrade = () => {
             <div className='form-group row mt-0 mb-0'>
               <div className='col-md-12'>
                 <p className='text-info m-0'>
-                  <strong>Price: </strong>
-                  {`${priceToken1} ${token1} - ${priceToken2} ${token2}`}
+                  <strong>You&apos;ll get: </strong>
+                  <DappUI.Denominate
+                    value={amountTransaction}
+                    token={token1.split('-')[0]}
+                  />
                 </p>
                 <p className='text-info m-0'>
                   <strong>Pool (amount available): </strong>
                 </p>
-                <p className='text-info m-0'>{`${amountAvailablePoolTk1} ${token1}`}</p>
-                <p className='text-info m-0'>{`${amountAvailablePoolTk2} ${token2}`}</p>
+                <p className='text-info m-0'>
+                  <DappUI.Denominate
+                    value={amountAvailablePoolTk1}
+                    token={token1.split('-')[0]}
+                  />
+                </p>
+                <p className='text-info m-0'>
+                  <DappUI.Denominate
+                    value={amountAvailablePoolTk2}
+                    token={token2.split('-')[0]}
+                  />
+                </p>
                 <p className='text-info m-0'>
                   <strong>Your wallet (amount available):</strong>
                 </p>
-                <p className='text-info m-0'>{`${amountAvailableTk1} ${token1}`}</p>
-                <p className='text-info m-0'>{`${amountAvailableTk2} ${token2}`}</p>
+                <p className='text-info m-0'>
+                  <DappUI.Denominate
+                    value={amountAvailableTk1}
+                    token={token1.split('-')[0]}
+                  />
+                </p>
+
+                <p className='text-info m-0'>
+                  <DappUI.Denominate
+                    value={amountAvailableTk2}
+                    token={token2.split('-')[0]}
+                  />
+                </p>
               </div>
             </div>
             <div className='form-group row mt-0 mb-0 text-right'>
@@ -443,7 +459,7 @@ const FormTrade = () => {
         <div className='d-flex m-0 p-0 justify-content-center'>
           <button className='btn bg-white m-2'>
             <FontAwesomeIcon icon={faArrowDown} className='text-primary' />
-            Buy {token1} with {token2}
+            Buy {token1.split('-')[0]} with {token2.split('-')[0]}
           </button>
         </div>
       </form>

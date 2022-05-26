@@ -6,7 +6,7 @@ export const hexEncodeStr = (str: string) =>
 
 // idea from:
 // https://github.com/bogdan-rosianu/elrond-converters
-export const hexEncodeNumber = (num: number) => {
+export const hexEncodeNumber = (num: number | string) => {
   const bn = new BigNumber(num, 10);
   let bnStr = bn.toString(16);
 

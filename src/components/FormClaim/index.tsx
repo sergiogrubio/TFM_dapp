@@ -1,6 +1,6 @@
 import React from 'react';
 import { useState } from 'react';
-import { useGetNetworkConfig } from '@elrondnetwork/dapp-core';
+import { DappUI, useGetNetworkConfig } from '@elrondnetwork/dapp-core';
 import { BytesValue } from '@elrondnetwork/erdjs';
 import { faArrowDown } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -216,12 +216,22 @@ const FormClaim = () => {
         </div>
         <div className='form-group row mt-0 mb-0'>
           <label htmlFor='amountPair' className='text-info'>
-            Pool available: {`${amountEgld}-${amountToken}`}
+            Pool available:{' '}
+            <DappUI.Denominate value={amountEgld} token='xEGLD' /> -{' '}
+            <DappUI.Denominate
+              value={amountToken}
+              token={claimData.pair.split('-')[0]}
+            />
           </label>
         </div>
         <div className='form-group row mt-0 mb-0'>
           <label htmlFor='amountEarnings' className='text-info'>
-            Earnings available: {`${amountEarnEgld}-${amountEarnToken}`}
+            Earnings available:{' '}
+            <DappUI.Denominate value={amountEarnEgld} token='xEGLD' /> -{' '}
+            <DappUI.Denominate
+              value={amountEarnToken}
+              token={claimData.pair.split('-')[0]}
+            />
           </label>
         </div>
         <div className='d-flex mt-4 justify-content-center'>

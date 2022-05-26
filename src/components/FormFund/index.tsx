@@ -1,13 +1,15 @@
 import React from 'react';
 import { useState } from 'react';
 import {
+  DappUI,
   useGetNetworkConfig,
   useGetAccountInfo
 } from '@elrondnetwork/dapp-core';
 import { BytesValue } from '@elrondnetwork/erdjs';
 import { faArrowUp } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { contractAddress } from 'config';
+import BigNumber from 'bignumber.js';
+import { contractAddress, numDecimals } from 'config';
 import { hexEncodeStr, hexEncodeNumber } from '../../controllers/common';
 import {
   getProvider,
@@ -63,7 +65,34 @@ const FormFund = () => {
     // updateTokens(address);
   };
 
+  const handleInputChangeToken = (event: any) => {
+    setFundData({
+      ...fundData,
+      [event.target.name]: event.target.value
+    });
+    // problem: now claimData.pair is the value before
+    // and event.target.value the new value
+    // when you submit the for values are OK, but not now
+    // so a solve it in a way I don't like...
+    // updateFundedToken(event.target.value);
+    // updateTokens(address);
+  };
+
+  const handleInputChangeEgld = (event: any) => {
+    setFundData({
+      ...fundData,
+      [event.target.name]: event.target.value
+    });
+    // problem: now claimData.pair is the value before
+    // and event.target.value the new value
+    // when you submit the for values are OK, but not now
+    // so a solve it in a way I don't like...
+    // updateFundedEgld(event.target.value);
+    // updateTokens(address);
+  };
+
   const updateFundedToken = async (token: string) => {
+    console.log('updateFundedToken', token);
     const amount = await myQueryNum(
       contractAddress,
       network,
@@ -74,6 +103,7 @@ const FormFund = () => {
   };
 
   const updateFundedEgld = async (token: string) => {
+    console.log('updateFundedEgld', token);
     const amount = await myQueryNum(
       contractAddress,
       network,
@@ -96,14 +126,21 @@ const FormFund = () => {
     // const { sendTransactions } = transactionServices;
 
     const token = fundData.token;
-    const amountToken = fundData.amountToken;
-    const amountEgld = fundData.amountEgld;
+    const amountToken = new BigNumber(
+      `${fundData.amountToken}e+${numDecimals}`,
+      10
+    );
+    const amountEgld = new BigNumber(
+      `${fundData.amountEgld}e+${numDecimals}`,
+      10
+    );
+
     const data =
       'ESDTTransfer' +
       '@' +
       hexEncodeStr(token) + // token identifier in hexadecimal encoding, UOC-d139bb
       '@' + // value to transfer in hexadecimal encoding, 52b7d2dcc80cd2e4000000=100000000000000000000000000
-      hexEncodeNumber(amountToken) +
+      hexEncodeNumber(amountToken.toString()) +
       '@' +
       hexEncodeStr('addLiquidityToken'); // name of method to call in hexadecimal encoding
 
@@ -115,7 +152,7 @@ const FormFund = () => {
     };
 
     const transaction2 = {
-      value: amountEgld,
+      value: amountEgld.toString(),
       data: 'addLiquidityEgld' + '@' + hexEncodeStr(token),
       receiver: contractAddress,
       gasLimit: 60000000
@@ -163,17 +200,19 @@ const FormFund = () => {
           <input
             className='form-control'
             type='number'
-            placeholder='x1000000'
-            step='1000000'
             min='0'
-            max='100000000000000000000000000'
+            step='any'
             id='amountToken'
             name='amountToken'
-            onChange={handleInputChange}
+            onChange={handleInputChangeToken}
             required
           />
           <label htmlFor='amountToken' className='text-info'>
-            Already funded: {`${amountFundedToken}`}
+            Already funded:{' '}
+            <DappUI.Denominate
+              value={amountFundedToken}
+              token={fundData.token.split('-')[0]}
+            />
           </label>
         </div>
         <div className='form-group row'>
@@ -183,17 +222,16 @@ const FormFund = () => {
           <input
             className='form-control'
             type='number'
-            placeholder='x1000000'
-            step='1000000'
             min='0'
-            max='100000000000000000000000000'
+            step='any'
             id='amountEgld'
             name='amountEgld'
-            onChange={handleInputChange}
+            onChange={handleInputChangeEgld}
             required
           />
           <label htmlFor='amountEgld' className='text-info'>
-            Already funded: {`${amountFundedEgld}`}
+            Already funded:{' '}
+            <DappUI.Denominate value={amountFundedEgld} token='xEGLD' />
           </label>
         </div>
         <div className='d-flex mt-4 justify-content-center'>
