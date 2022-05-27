@@ -6,7 +6,7 @@ import {
   useGetAccountInfo
 } from '@elrondnetwork/dapp-core';
 import { BytesValue } from '@elrondnetwork/erdjs';
-import { faArrowDown } from '@fortawesome/free-solid-svg-icons';
+import { faArrowDown, faArrowUp } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import BigNumber from 'bignumber.js';
 import { contractAddress, numDecimals } from 'config';
@@ -18,22 +18,22 @@ import {
 } from '../../controllers/myTransactions';
 
 const FormTrade = () => {
-  const [token1, setToken1] = useState('');
-  const [token2, setToken2] = useState('');
-  const [amountTransaction, setAmountTransaction] = useState('');
-  const [amountAvailableTk1, setAmountAvailableTk1] = useState('');
-  const [amountAvailableTk2, setAmountAvailableTk2] = useState('');
-  const [amountAvailablePoolTk1, setAmountAvailablePoolTk1] = useState('');
-  const [amountAvailablePoolTk2, setAmountAvailablePoolTk2] = useState('');
-  const [itemsSelect, setItemsSelect] = useState([
-    { identifier: '', name: 'select a pair', value1: '', value2: '' }
-  ]);
-  const [tradeData, setTradeData] = useState({
-    pair: [],
-    amount: 0
-  });
+  const [amountTransactionBuy, setAmountTransactionBuy] = useState('');
+  const [amountTransactionSell, setAmountTransactionSell] = useState('');
+  const [amountAvailableToken, setAmountAvailableToken] = useState('');
+  const [amountAvailableEgld, setAmountAvailableEgld] = useState('');
+  const [amountAvailablePoolToken, setAmountAvailablePoolToken] = useState('');
+  const [amountAvailablePoolEgld, setAmountAvailablePoolEgld] = useState('');
   const [initialK, setInitialK] = useState('0');
   const [currentK, setCurrentK] = useState('0');
+  const [referenceToken, setReferenceToken] = useState('');
+  const [itemsSelect, setItemsSelect] = useState([
+    { identifier: '', name: 'select a pair', value: '' }
+  ]);
+  const [tradeData, setTradeData] = useState({
+    pair: '',
+    amount: 0
+  });
   const { network } = useGetNetworkConfig();
   const { address, account } = useGetAccountInfo();
   const /*transactionSessionId*/ [, setTransactionSessionId] = React.useState<
@@ -59,10 +59,7 @@ const FormTrade = () => {
     };
   }, []);
 
-  const updatePriceEgldToken = async (
-    token: string,
-    amount: number | string
-  ) => {
+  const getPriceSell = async (token: string, amount: number | string) => {
     const numerator = await myQueryNum(
       contractAddress,
       network,
@@ -83,23 +80,10 @@ const FormTrade = () => {
       ]
     );
     const resultStr = bigIntDiv(numerator, denominator);
-    setAmountTransaction(resultStr);
-    console.log(
-      'updatePriceEgldToken',
-      amountTransaction,
-      resultStr,
-      numerator,
-      denominator
-    );
-
-    // setToken1('xEGLD');
-    // setToken2(token.split('-')[0]);
+    return resultStr;
   };
 
-  const updatePriceTokenEgld = async (
-    token: string,
-    amount: number | string
-  ) => {
+  const getPriceBuy = async (token: string, amount: number | string) => {
     const numerator = await myQueryNum(
       contractAddress,
       network,
@@ -121,17 +105,7 @@ const FormTrade = () => {
     );
 
     const resultStr = bigIntDiv(numerator, denominator);
-    setAmountTransaction(resultStr);
-    console.log(
-      'updatePriceTokenEgld',
-      amountTransaction,
-      resultStr,
-      numerator,
-      denominator
-    );
-
-    // setToken1(token.split('-')[0]);
-    // setToken2('xEGLD');
+    return resultStr;
   };
 
   const bigIntDiv = (numerator: string, denominator: string) => {
@@ -141,20 +115,14 @@ const FormTrade = () => {
     return result.toString();
   };
 
-  const updateAmount = (pToken1: string, pToken2: string, pAmount: number) => {
-    // converting to int
+  const updateAmount = async (pToken: string, pAmount: number) => {
     const num = new BigNumber(`${pAmount}e+${numDecimals}`, 10);
     const amount = num.toString();
 
-    if (pToken1 === 'xEGLD') {
-      console.log('updatePriceEgldToken', pToken2, amount);
-      // get how many tokens I need to get 1 EGLD
-      updatePriceEgldToken(pToken2, amount);
-    } else {
-      console.log('updatePriceTokenEgld', pToken1, amount);
-      // get how many EGLD I need to get 1 token
-      updatePriceTokenEgld(pToken1, amount);
-    }
+    const priceBuy = await getPriceBuy(pToken, amount);
+    setAmountTransactionBuy(priceBuy);
+    const priceSell = await getPriceSell(pToken, amount);
+    setAmountTransactionSell(priceSell);
   };
 
   const queryFunc = async (token: string, func: string) => {
@@ -174,114 +142,91 @@ const FormTrade = () => {
     setInitialK(myInitialK);
   };
 
-  const updateAmountToken = async (token: string, setter: any) => {
+  const getAmountToken = async (token: string) => {
     const myAmountToken = await queryFunc(token, 'getLiquidityToken');
-    setter(myAmountToken);
+    return myAmountToken;
   };
 
-  const updateAmountEgld = async (token: string, setter: any) => {
+  const getAmountEgld = async (token: string) => {
     const myAmountEgld = await queryFunc(token, 'getLiquidityEgld');
-    setter(myAmountEgld);
+    return myAmountEgld;
   };
 
   const updatePairs = (myAdd: string) => {
     const provider = getProvider();
-
     provider.getTokens(myAdd).then((tokens) => {
-      tokens.map(
-        (i: {
-          identifier: string;
-          name: string;
-          value1: string;
-          value2: string;
-        }) => {
-          tokens.push({
-            identifier: i.identifier,
-            name: i.name + '-xEGLD',
-            value1: i.identifier,
-            value2: 'xEGLD'
-          });
-          i.value1 = 'xEGLD';
-          i.value2 = i.identifier;
-          i.name = 'xEGLD-' + i.name;
-        }
-      );
-
+      tokens.map((i: { name: string }) => {
+        i.name = i.name + '-xEGLD';
+      });
       // idea for sorting:
       // https://stackoverflow.com/questions/1129216/sort-array-of-objects-by-string-property-value
       tokens = tokens.sort((a: any, b: any) =>
         a.name > b.name ? 1 : b.name > a.name ? -1 : 0
       );
-
       setItemsSelect(tokens);
     });
   };
 
-  const updateBalance = (pToken1: string, pToken2: string) => {
+  const updateBalance = async (pToken: string) => {
     const provider = getProvider();
-    setAmountAvailableTk1('');
-    setAmountAvailableTk2('');
-    setAmountAvailablePoolTk1('');
-    setAmountAvailablePoolTk2('');
-    if (pToken1 === 'xEGLD') {
-      provider.getTokenData(address, pToken2).then(({ balance }) => {
-        //setItemsSelect(tokens);
-        setAmountAvailableTk1(account.balance);
-        setAmountAvailableTk2(balance);
-        updateAmountEgld(pToken2, setAmountAvailablePoolTk1);
-        updateAmountToken(pToken2, setAmountAvailablePoolTk2);
-      });
-    } else {
-      provider.getTokenData(address, pToken1).then(({ balance }) => {
-        //setItemsSelect(tokens);
-        setAmountAvailableTk1(balance);
-        setAmountAvailableTk2(account.balance);
-        updateAmountEgld(pToken1, setAmountAvailablePoolTk2);
-        updateAmountToken(pToken1, setAmountAvailablePoolTk1);
-      });
-    }
+    setAmountAvailableToken('');
+    setAmountAvailableEgld('');
+    setAmountAvailablePoolToken('');
+    setAmountAvailablePoolEgld('');
+
+    // label "Your wallet (amount available)""
+    provider.getTokenData(address, pToken).then(({ balance }) => {
+      //setItemsSelect(tokens);
+      setAmountAvailableToken(balance);
+      setAmountAvailableEgld(account.balance);
+    });
+
+    // label "Pool (amount available)"
+    const amountEgld = await getAmountEgld(pToken);
+    const amountToken = await getAmountToken(pToken);
+    setAmountAvailablePoolEgld(amountEgld);
+    setAmountAvailablePoolToken(amountToken);
   };
 
   const handleSubmit = (event: any) => {
     event.preventDefault();
 
-    const tks = tradeData.pair.toString().split(',');
-    const amount = tradeData.amount;
-    const tk1 = tks[0];
-    const tk2 = tks[1];
+    // const tks = tradeData.tradeData.pair.toString().split(',');
+    // const amount = tradeData.amount;
+    // const tk1 = tks[0];
+    // const tk2 = tks[1];
 
-    if (tk1 === 'xEGLD') {
-      // Buy EGLD with token, egld_to_token
-      swapEgldForToken(amount, tk2, contractAddress, 60000000);
-    } else {
-      // Buy token with EGLD, token_to_egld
-      swapTokenForEgld(amount, tk1, contractAddress, 60000000);
-    }
+    // if (tk1 === 'xEGLD') {
+    //   // Buy EGLD with token, egld_to_token
+    //   swapEgldForToken(amount, tk2, contractAddress, 60000000);
+    // } else {
+    //   // Buy token with EGLD, token_to_egld
+    //   swapTokenForEgld(amount, tk1, contractAddress, 60000000);
+    // }
+  };
+
+  const handleSubmitBuy = () => {
+    const token = tradeData.pair;
+    const decAmount = tradeData.amount;
+
+    const num = new BigNumber(`${decAmount}e+${numDecimals}`, 10);
+    const intAmount = num.toString();
+
+    swapEgldForToken(intAmount, token, contractAddress, 60000000);
+  };
+
+  const handleSubmitSell = () => {
+    const token = tradeData.pair;
+    const decAmount = tradeData.amount;
+
+    const num = new BigNumber(`${decAmount}e+${numDecimals}`, 10);
+    const intAmount = num.toString();
+
+    swapTokenForEgld(intAmount, token, contractAddress, 60000000);
   };
 
   const swapTokenForEgld = async (
-    pValue: number,
-    pToken: string,
-    pAddress: string,
-    pGas: number
-  ) => {
-    const transaction = {
-      value: pValue,
-      data: 'swapTokenForEgld' + '@' + hexEncodeStr(pToken),
-      receiver: pAddress,
-      gasLimit: pGas
-    };
-    const sessionId = await myTransactions([transaction]);
-
-    if (sessionId != null) {
-      setTransactionSessionId(sessionId);
-    } else {
-      console.log('swapTokenForEgld error sessionId = null');
-    }
-  };
-
-  const swapEgldForToken = async (
-    pValue: number,
+    pValue: string,
     pToken: string,
     pAddress: string,
     pGas: number
@@ -295,7 +240,7 @@ const FormTrade = () => {
         '@' + // value to transfer in hexadecimal encoding
         hexEncodeNumber(pValue) +
         '@' + // name of method to call in hexadecimal encoding
-        hexEncodeStr('swapEgldForToken'),
+        hexEncodeStr('swapTokenForEgld'),
       receiver: pAddress,
       gasLimit: pGas
     };
@@ -309,6 +254,27 @@ const FormTrade = () => {
     }
   };
 
+  const swapEgldForToken = async (
+    pValue: string,
+    pToken: string,
+    pAddress: string,
+    pGas: number
+  ) => {
+    const transaction = {
+      value: pValue,
+      data: 'swapEgldForToken' + '@' + hexEncodeStr(pToken),
+      receiver: pAddress,
+      gasLimit: pGas
+    };
+    const sessionId = await myTransactions([transaction]);
+
+    if (sessionId != null) {
+      setTransactionSessionId(sessionId);
+    } else {
+      console.log('swapTokenForEgld error sessionId = null');
+    }
+  };
+
   // TODO: change "any"
   const handleInputChangeSelect = (event: any) => {
     setTradeData({
@@ -316,36 +282,37 @@ const FormTrade = () => {
       [event.target.name]: event.target.value
     });
     const amount = tradeData.amount;
-    const tks = event.target.value.toString().split(',');
-    // setToken1('');
-    // setPriceToken1('');
-    // setAmountAvailableTk1('');
-    // setToken2('');
-    // setPriceToken2('');
-    // setAmountAvailableTk2('');
-    // setInitialK('0');
-    // setCurrentK('0');
+    const token = event.target.value.trim();
 
-    if (tks.length > 1) {
-      const tk1 = tks[0];
-      const tk2 = tks[1];
+    setAmountTransactionBuy('');
+    setAmountTransactionSell('');
 
-      setToken1(tk1);
-      setToken2(tk2);
+    if (token !== '') {
+      // label "Current K"
+      updateCurrentK(token);
+      // label "Initial K"
+      updateInitialK(token);
 
-      updateAmount(tk1, tk2, amount);
+      // labels:
+      // - "Your wallet (amount available)""
+      // - "Pool (amount available)"
+      updateBalance(token);
 
-      if (tk1 === 'xEGLD') {
-        updateCurrentK(tk2);
-        updateInitialK(tk2);
-
-        // updateBalance(tk1, tk2);
-      } else {
-        updateCurrentK(tk1);
-        updateInitialK(tk1);
-        // updateBalance(tk2, tk1);
-      }
-      updateBalance(tk1, tk2);
+      // labels:
+      // - "Buy"
+      // - "Sell"
+      updateAmount(token, amount);
+      setReferenceToken('xEGLD');
+    } else {
+      setAmountTransactionBuy('');
+      setAmountTransactionSell('');
+      setAmountAvailableToken('');
+      setAmountAvailableEgld('');
+      setAmountAvailablePoolToken('');
+      setAmountAvailablePoolEgld('');
+      setInitialK('0');
+      setCurrentK('0');
+      setReferenceToken('');
     }
   };
 
@@ -354,8 +321,12 @@ const FormTrade = () => {
       ...tradeData,
       [event.target.name]: event.target.value
     });
-    const tks = tradeData.pair.toString().split(',');
-    updateAmount(tks[0], tks[1], event.target.value);
+
+    const token = tradeData.pair;
+    const amount = event.target.value;
+    setAmountTransactionBuy('');
+    setAmountTransactionSell('');
+    if (token.trim() !== '') updateAmount(token, amount);
   };
 
   return (
@@ -363,7 +334,7 @@ const FormTrade = () => {
       <h4 className='mb-3 font-weight-normal text-light'>Swap tokens</h4>
       <form className='' onSubmit={handleSubmit}>
         <div className='form-group row'>
-          <label htmlFor='token' className=''>
+          <label htmlFor='token' className='text-light'>
             Select pair:
           </label>
           <select
@@ -378,21 +349,21 @@ const FormTrade = () => {
               select a pair
             </option>
             {itemsSelect.map((x) => (
-              <option key={x.name} value={[x.value1, x.value2]}>
+              <option key={x.identifier} value={x.identifier}>
                 {x.name}
               </option>
             ))}
           </select>
         </div>
         <div className='form-group row mb-0'>
-          <label htmlFor='amount' className=''>
-            Amount of {token2.split('-')[0]}:
+          <label htmlFor='amount' className='text-light'>
+            Amount:
           </label>
           <input
             className='form-control'
             type='number'
             name='amount'
-            min='1'
+            min='0.0001'
             step='any'
             onChange={handleInputChange}
             required
@@ -401,10 +372,25 @@ const FormTrade = () => {
             <div className='form-group row mt-0 mb-0'>
               <div className='col-md-12'>
                 <p className='text-info m-0'>
-                  <strong>You&apos;ll get: </strong>
+                  <strong>Buy: </strong>
+                  Paying {tradeData.amount}{' '}
+                  <span className='text-secondary'>{referenceToken}</span>{' '}
+                  you&apos;ll get{' '}
                   <DappUI.Denominate
-                    value={amountTransaction}
-                    token={token1.split('-')[0]}
+                    value={amountTransactionSell}
+                    token={tradeData.pair.split('-')[0]}
+                  />
+                </p>
+                <p className='text-info m-0'>
+                  <strong>Sell: </strong>
+                  Paying {tradeData.amount}{' '}
+                  <span className='text-secondary'>
+                    {tradeData.pair.split('-')[0]}
+                  </span>{' '}
+                  you&apos;ll get{' '}
+                  <DappUI.Denominate
+                    value={amountTransactionBuy}
+                    token='xEGLD'
                   />
                 </p>
                 <p className='text-info m-0'>
@@ -412,14 +398,14 @@ const FormTrade = () => {
                 </p>
                 <p className='text-info m-0'>
                   <DappUI.Denominate
-                    value={amountAvailablePoolTk1}
-                    token={token1.split('-')[0]}
+                    value={amountAvailablePoolToken}
+                    token={tradeData.pair.split('-')[0]}
                   />
                 </p>
                 <p className='text-info m-0'>
                   <DappUI.Denominate
-                    value={amountAvailablePoolTk2}
-                    token={token2.split('-')[0]}
+                    value={amountAvailablePoolEgld}
+                    token='xEGLD'
                   />
                 </p>
                 <p className='text-info m-0'>
@@ -427,15 +413,14 @@ const FormTrade = () => {
                 </p>
                 <p className='text-info m-0'>
                   <DappUI.Denominate
-                    value={amountAvailableTk1}
-                    token={token1.split('-')[0]}
+                    value={amountAvailableToken}
+                    token={tradeData.pair.split('-')[0]}
                   />
                 </p>
-
                 <p className='text-info m-0'>
                   <DappUI.Denominate
-                    value={amountAvailableTk2}
-                    token={token2.split('-')[0]}
+                    value={amountAvailableEgld}
+                    token='xEGLD'
                   />
                 </p>
               </div>
@@ -457,9 +442,13 @@ const FormTrade = () => {
           </div>
         </div>
         <div className='d-flex m-0 p-0 justify-content-center'>
-          <button className='btn bg-white m-2'>
-            <FontAwesomeIcon icon={faArrowDown} className='text-primary' />
-            Buy {token1.split('-')[0]} with {token2.split('-')[0]}
+          <button className='btn bg-white m-2' onClick={handleSubmitBuy}>
+            <FontAwesomeIcon icon={faArrowDown} className='text-primary' /> Buy{' '}
+            {tradeData.pair.split('-')[0]} paying {referenceToken}
+          </button>
+          <button className='btn bg-white m-2' onClick={handleSubmitSell}>
+            <FontAwesomeIcon icon={faArrowUp} className='text-primary' /> Sell{' '}
+            {tradeData.pair.split('-')[0]} getting {referenceToken}
           </button>
         </div>
       </form>

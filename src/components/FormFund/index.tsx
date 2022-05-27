@@ -56,13 +56,20 @@ const FormFund = () => {
       ...fundData,
       [event.target.name]: event.target.value
     });
-    // problem: now claimData.pair is the value before
-    // and event.target.value the new value
-    // when you submit the for values are OK, but not now
-    // so a solve it in a way I don't like...
-    updateFundedEgld(event.target.value);
-    updateFundedToken(event.target.value);
-    // updateTokens(address);
+    const token = event.target.value.trim();
+
+    if (token !== '') {
+      // problem: now claimData.pair is the value before
+      // and event.target.value the new value
+      // when you submit the for values are OK, but not now
+      // so a solve it in a way I don't like...
+      updateFundedEgld(event.target.value);
+      updateFundedToken(event.target.value);
+      // updateTokens(address);
+    } else {
+      setAmountFundedEgld('');
+      setAmountFundedToken('');
+    }
   };
 
   const handleInputChangeToken = (event: any) => {
@@ -70,12 +77,6 @@ const FormFund = () => {
       ...fundData,
       [event.target.name]: event.target.value
     });
-    // problem: now claimData.pair is the value before
-    // and event.target.value the new value
-    // when you submit the for values are OK, but not now
-    // so a solve it in a way I don't like...
-    // updateFundedToken(event.target.value);
-    // updateTokens(address);
   };
 
   const handleInputChangeEgld = (event: any) => {
@@ -83,12 +84,6 @@ const FormFund = () => {
       ...fundData,
       [event.target.name]: event.target.value
     });
-    // problem: now claimData.pair is the value before
-    // and event.target.value the new value
-    // when you submit the for values are OK, but not now
-    // so a solve it in a way I don't like...
-    // updateFundedEgld(event.target.value);
-    // updateTokens(address);
   };
 
   const updateFundedToken = async (token: string) => {
@@ -236,8 +231,7 @@ const FormFund = () => {
         </div>
         <div className='d-flex mt-4 justify-content-center'>
           <button className='btn bg-white m-2'>
-            <FontAwesomeIcon icon={faArrowUp} className='text-primary' />
-            Fund
+            <FontAwesomeIcon icon={faArrowUp} className='text-primary' /> Fund
           </button>
         </div>
       </form>

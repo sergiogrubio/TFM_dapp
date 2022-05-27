@@ -50,10 +50,9 @@ const FormClaim = () => {
 
   const updateTokens = (myAdd: string) => {
     const provider = getProvider();
-    const address = myAdd;
-    provider.getTokens(address).then((tokens) => {
+    provider.getTokens(myAdd).then((tokens) => {
       tokens.map((i: { name: string }) => {
-        i.name = 'xEGLD-' + i.name;
+        i.name = i.name + '-xEGLD';
       });
       // idea for sorting:
       // https://stackoverflow.com/questions/1129216/sort-array-of-objects-by-string-property-value
@@ -126,6 +125,7 @@ const FormClaim = () => {
 
   const claimPool = async () => {
     const pair = claimData.pair;
+
     const transaction1 = {
       value: '0',
       data: 'claimLiquidityToken' + '@' + hexEncodeStr(pair),
@@ -156,14 +156,23 @@ const FormClaim = () => {
       ...claimData,
       [event.target.name]: event.target.value
     });
-    // problem: now claimData.pair is the value before
-    // and event.target.value the new value
-    // when you submit the for values are OK, but not now
-    // so a solve it in a way I don't like...
-    updateAmountEgld(event.target.value);
-    updateAmountToken(event.target.value);
-    updateEarningsToken(event.target.value);
-    updateEarningsEgld();
+    const token = event.target.value.trim();
+
+    if (token !== '') {
+      // problem: now claimData.pair is the value before
+      // and event.target.value the new value
+      // when you submit the for values are OK, but not now
+      // so a solve it in a way I don't like...
+      updateAmountEgld(event.target.value);
+      updateAmountToken(event.target.value);
+      updateEarningsToken(event.target.value);
+      updateEarningsEgld();
+    } else {
+      setAmountEgld('');
+      setAmountToken('');
+      setAmountEarnEgld('');
+      setAmountEarnToken('');
+    }
   };
 
   const handleSubmit = (event: any) => {
@@ -240,11 +249,11 @@ const FormClaim = () => {
             value='bEarnings'
             className='btn bg-white m-2'
           >
-            <FontAwesomeIcon icon={faArrowDown} className='text-primary' />
+            <FontAwesomeIcon icon={faArrowDown} className='text-primary' />{' '}
             Claim earnings
           </button>
           <button name='bPool' value='bPool' className='btn bg-white m-2'>
-            <FontAwesomeIcon icon={faArrowDown} className='text-primary' />
+            <FontAwesomeIcon icon={faArrowDown} className='text-primary' />{' '}
             Claim pool
           </button>
         </div>
