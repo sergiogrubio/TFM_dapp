@@ -119,7 +119,7 @@ const FormClaim = () => {
       updateEarningsToken('');
       updateEarningsEgld();
     } else {
-      console.log('claimEarnings');
+      console.log('Error in claimEarnings sessionId = null');
     }
   };
 
@@ -178,8 +178,12 @@ const FormClaim = () => {
   const handleSubmit = (event: any) => {
     event.preventDefault();
     const btn = document.activeElement;
-    console.log(btn?.textContent);
-    switch (btn?.textContent) {
+    console.log(
+      '%cindex.tsx line:181 object',
+      'color: #007acc;',
+      btn?.textContent
+    );
+    switch (btn?.textContent?.trim()) {
       case 'Claim earnings': {
         claimEarnings();
         break;

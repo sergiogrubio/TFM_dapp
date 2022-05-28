@@ -1,7 +1,7 @@
 import * as React from 'react';
 import FormFund from '../../components/FormFund';
 import Transactions from '../../components/Transactions';
-
+const filterFuncs = ['addLiquidityToken', 'addLiquidityEgld'];
 const Fund = () => {
   return (
     <div className='container py-4'>
@@ -14,7 +14,10 @@ const Fund = () => {
                   <FormFund />
                 </div>
               </div>
-              <Transactions />
+              <Transactions
+                title='Transactions related to funding liquidity pools and you account'
+                filterFuncs={filterFuncs}
+              />
             </div>
           </div>
         </div>

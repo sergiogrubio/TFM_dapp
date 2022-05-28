@@ -12,7 +12,13 @@ import { contractAddress } from 'config';
 import TransactionsList from './TransactionsList';
 import { StateType } from './types';
 
-const Transactions = () => {
+const Transactions = ({
+  title,
+  filterFuncs
+}: {
+  title: string;
+  filterFuncs: string[];
+}) => {
   const {
     network: { apiAddress }
   } = useGetNetworkConfig();
@@ -23,6 +29,8 @@ const Transactions = () => {
     transactions: [],
     transactionsFetched: undefined
   });
+  // const [title, setTitle] = React.useState('');
+  // setTitle('Hello world');
   const account = useGetAccountInfo();
 
   const fetchData = () => {
@@ -47,7 +55,11 @@ const Transactions = () => {
   const { transactions } = state;
 
   return transactions.length > 0 ? (
-    <TransactionsList transactions={transactions} />
+    <TransactionsList
+      transactions={transactions}
+      title={title}
+      filterFuncs={filterFuncs}
+    />
   ) : (
     <div className='my-5'>
       <DappUI.PageState

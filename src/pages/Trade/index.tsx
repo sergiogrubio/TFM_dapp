@@ -1,7 +1,7 @@
 import * as React from 'react';
 import FormTrade from '../../components/FormTrade';
 import Transactions from '../../components/Transactions';
-
+const filterFuncs = ['swapEgldForToken', 'swapTokenForEgld'];
 const Trade = () => {
   return (
     <div className='container py-4'>
@@ -14,7 +14,10 @@ const Trade = () => {
                   <FormTrade />
                 </div>
               </div>
-              <Transactions />
+              <Transactions
+                title='Transactions related to trading and your account'
+                filterFuncs={filterFuncs}
+              />
             </div>
           </div>
         </div>

@@ -17,6 +17,7 @@ export interface TransactionType {
   fee?: string;
   blockHash: string;
   data: string;
+  function: string; // added by me
   gasLimit: number;
   gasPrice: number;
   gasUsed: string;

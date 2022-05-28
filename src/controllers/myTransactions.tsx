@@ -16,6 +16,11 @@ export class CustomNetworkProvider extends ApiNetworkProvider {
   async getTokenData(address: string, token: string) {
     return await this.doGetGeneric(`accounts/${address}/tokens/${token}/`);
   }
+  async isOwnerSC(addressSC: string, addressOwner: string) {
+    const { ownerAddress } = await this.doGetGeneric(`accounts/${addressSC}`);
+
+    return ownerAddress === addressOwner;
+  }
 }
 
 export const getProvider = () => {
@@ -69,7 +74,7 @@ export const myTransactions = async (pTransactions: any[]) => {
 //     });
 // };
 
-// query the smartcontract, only for methods returning a int value
+// query the smartcontract, only for methods returning an int value
 export const myQueryNum = async (
   pAddress: string,
   pNetwork: any,

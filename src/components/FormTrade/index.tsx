@@ -363,8 +363,8 @@ const FormTrade = () => {
             className='form-control'
             type='number'
             name='amount'
-            min='0.0001'
-            step='any'
+            min='0'
+            step='0.0001'
             onChange={handleInputChange}
             required
           />

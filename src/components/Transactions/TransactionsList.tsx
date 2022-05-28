@@ -23,32 +23,37 @@ const fakeSender =
   'erd000000000000000000000000000000000000000000000000000000000a';
 
 const TransactionList = ({
-  transactions
+  transactions,
+  title,
+  filterFuncs
 }: {
   transactions: TransactionType[];
+  title: string;
+  filterFuncs: string[];
 }) => {
   const { network } = useGetNetworkConfig();
   const account = useGetAccountInfo();
+
   const incoming = (sender: string) =>
     sender === account.address && sender !== fakeSender;
 
   // eslint-disable-next-line
   const doubleOwnTransactions = transactions
-    .filter((tx) => tx.sender === tx.receiver && tx.blockHash !== '')
+    .filter((tx) => tx.sender === tx.receiver && tx.blockHash)
     .map((tx) => ({ ...tx, sender: fakeSender, timestamp: tx.timestamp + 1 }));
 
   const sortedTransactions: TransactionType[] = (
     [
       ...transactions,
       ...(doubleOwnTransactions.length > 0 ? doubleOwnTransactions : [])
-    ].filter((el: any) => el !== undefined) as any
+    ].filter(
+      (el: any) => el !== undefined && filterFuncs.includes(el.function)
+    ) as any
   ).sort(sortByDate);
 
   return (
     <div className='p-3 mt-3'>
-      <h4 className='mb-3 font-weight-normal text-center'>
-        Smart Contract Transactions
-      </h4>
+      <h5 className='mb-3 font-weight-normal text-center'>{title}</h5>
       <div className='table-responsive'>
         <table className='transactions table pb-3'>
           <thead>

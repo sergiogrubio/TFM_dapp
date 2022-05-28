@@ -2,6 +2,7 @@ import * as React from 'react';
 
 import FormClaim from '../../components/FormClaim';
 import Transactions from '../../components/Transactions';
+const filterFuncs = ['claimLiquidityToken', 'claimLiquidityEgld'];
 
 const Claim = () => {
   return (
@@ -15,7 +16,10 @@ const Claim = () => {
                   <FormClaim />
                 </div>
               </div>
-              <Transactions />
+              <Transactions
+                title='Transaction related to claiming funds and your account'
+                filterFuncs={filterFuncs}
+              />
             </div>
           </div>
         </div>

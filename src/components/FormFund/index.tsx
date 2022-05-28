@@ -196,7 +196,7 @@ const FormFund = () => {
             className='form-control'
             type='number'
             min='0'
-            step='any'
+            step='0.0001'
             id='amountToken'
             name='amountToken'
             onChange={handleInputChangeToken}
@@ -218,7 +218,7 @@ const FormFund = () => {
             className='form-control'
             type='number'
             min='0'
-            step='any'
+            step='0.0001'
             id='amountEgld'
             name='amountEgld'
             onChange={handleInputChangeEgld}

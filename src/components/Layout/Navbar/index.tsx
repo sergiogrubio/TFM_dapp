@@ -8,11 +8,12 @@ import { ReactComponent as ElrondLogo } from './../../../assets/img/elrond.svg';
 
 interface NavBarProps {
   current: string;
+  isOwner: boolean;
 }
 
 const Navbar = (props: NavBarProps) => {
   const { address } = useGetAccountInfo();
-  const { current } = props;
+  const { current, isOwner } = props;
 
   const handleClick = (event: any) => {
     const option = event.target.innerText.toLowerCase();
@@ -25,24 +26,8 @@ const Navbar = (props: NavBarProps) => {
     logout(`${window.location.origin}`);
   };
 
-  // const handleFund = () => {
-  //   logout(`${window.location.origin}/fund`);
-  // };
-
-  // const handleClaim = () => {
-  //   logout(`${window.location.origin}/claim`);
-  // };
-
-  // const handleTrade = () => {
-  //   logout(`${window.location.origin}/trade`);
-  // };
-
-  // const handlesetPriceToken2 = () => {
-  //   logout(`${window.location.origin}/stats`);
-  // };
-
   const isLoggedIn = Boolean(address);
-
+  console.log('bedore BSNavbar', isOwner);
   return (
     <BsNavbar className='bg-white border-bottom px-4 py-3'>
       <div className='container-fluid'>
@@ -66,6 +51,7 @@ const Navbar = (props: NavBarProps) => {
                     : 'btn btn-link'
                 }
                 onClick={handleClick}
+                disabled={!isOwner}
               >
                 Claim
               </button>
@@ -80,6 +66,7 @@ const Navbar = (props: NavBarProps) => {
                     : 'btn btn-link'
                 }
                 onClick={handleClick}
+                disabled={!isOwner}
               >
                 Fund
               </button>
