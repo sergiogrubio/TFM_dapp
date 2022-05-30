@@ -57,13 +57,13 @@
     "prettier": "2.3.2"
   },
   "scripts": {
-    "start": "node --max_old_space_size=2560 node_modules/.bin/react-scripts start",
+    "start": "DISABLE_ESLINT_PLUGIN=true node --max_old_space_size=2560 node_modules/.bin/react-scripts start",
     "start-testnet": "npm run copy-testnet-config & npm run start",
     "start-devnet": "npm run copy-devnet-config & npm run start",
-    "build": "node --max_old_space_size=2560 node_modules/.bin/react-scripts build",
+    "build": "DISABLE_ESLINT_PLUGIN=true node --max_old_space_size=2560 node_modules/.bin/react-scripts build",
     "build-testnet": "npm run copy-testnet-config & npm run build",
     "build-devnet": "npm run copy-devnet-config & npm run build",
-    "test": "react-scripts test",
+    "test": "DISABLE_ESLINT_PLUGIN=true react-scripts test",
     "copy-testnet-config": "cp ./src/config.testnet.tsx ./src/config.tsx",
     "copy-devnet-config": "cp ./src/config.devnet.tsx ./src/config.tsx",
     "eject": "react-scripts eject",
