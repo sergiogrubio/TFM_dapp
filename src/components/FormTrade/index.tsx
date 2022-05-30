@@ -9,7 +9,7 @@ import { BytesValue } from '@elrondnetwork/erdjs';
 import { faArrowDown, faArrowUp } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import BigNumber from 'bignumber.js';
-import { contractAddress, numDecimals } from 'config';
+import { contractAddress, maxNum, numDecimals } from 'config';
 import { hexEncodeNumber, hexEncodeStr } from '../../controllers/common';
 import {
   getProvider,
@@ -27,6 +27,8 @@ const FormTrade = () => {
   const [initialK, setInitialK] = useState('0');
   const [currentK, setCurrentK] = useState('0');
   const [referenceToken, setReferenceToken] = useState('');
+  // const [disabledBuy, setDisabledBuy] = useState(false);
+  // const [disabledSell, setDisabledSell] = useState(false);
   const [itemsSelect, setItemsSelect] = useState([
     { identifier: '', name: 'select a pair', value: '' }
   ]);
@@ -59,11 +61,11 @@ const FormTrade = () => {
     };
   }, []);
 
-  const getPriceSell = async (token: string, amount: number | string) => {
+  const getPriceBuy = async (token: string, amount: number | string) => {
     const numerator = await myQueryNum(
       contractAddress,
       network,
-      'priceEgldTokenNoFeeNumerator',
+      'priceEgldTokenNumerator',
       [
         BytesValue.fromHex(hexEncodeStr(token)),
         BytesValue.fromHex(hexEncodeNumber(amount))
@@ -73,7 +75,7 @@ const FormTrade = () => {
     const denominator = await myQueryNum(
       contractAddress,
       network,
-      'priceEgldTokenNoFeeDenominator',
+      'priceEgldTokenDenominator',
       [
         BytesValue.fromHex(hexEncodeStr(token)),
         BytesValue.fromHex(hexEncodeNumber(amount))
@@ -83,11 +85,11 @@ const FormTrade = () => {
     return resultStr;
   };
 
-  const getPriceBuy = async (token: string, amount: number | string) => {
+  const getPriceSell = async (token: string, amount: number | string) => {
     const numerator = await myQueryNum(
       contractAddress,
       network,
-      'priceTokenEgldNoFeeNumerator',
+      'priceTokenEgldNumerator',
       [
         BytesValue.fromHex(hexEncodeStr(token)),
         BytesValue.fromHex(hexEncodeNumber(amount))
@@ -97,7 +99,7 @@ const FormTrade = () => {
     const denominator = await myQueryNum(
       contractAddress,
       network,
-      'priceTokenEgldNoFeeDenominator',
+      'priceTokenEgldDenominator',
       [
         BytesValue.fromHex(hexEncodeStr(token)),
         BytesValue.fromHex(hexEncodeNumber(amount))
@@ -190,19 +192,6 @@ const FormTrade = () => {
 
   const handleSubmit = (event: any) => {
     event.preventDefault();
-
-    // const tks = tradeData.tradeData.pair.toString().split(',');
-    // const amount = tradeData.amount;
-    // const tk1 = tks[0];
-    // const tk2 = tks[1];
-
-    // if (tk1 === 'xEGLD') {
-    //   // Buy EGLD with token, egld_to_token
-    //   swapEgldForToken(amount, tk2, contractAddress, 60000000);
-    // } else {
-    //   // Buy token with EGLD, token_to_egld
-    //   swapTokenForEgld(amount, tk1, contractAddress, 60000000);
-    // }
   };
 
   const handleSubmitBuy = () => {
@@ -303,6 +292,7 @@ const FormTrade = () => {
       // - "Sell"
       updateAmount(token, amount);
       setReferenceToken('xEGLD');
+      // disableButtons();
     } else {
       setAmountTransactionBuy('');
       setAmountTransactionSell('');
@@ -313,6 +303,8 @@ const FormTrade = () => {
       setInitialK('0');
       setCurrentK('0');
       setReferenceToken('');
+      // setDisabledBuy(false);
+      // setDisabledBuy(true);
     }
   };
 
@@ -327,7 +319,22 @@ const FormTrade = () => {
     setAmountTransactionBuy('');
     setAmountTransactionSell('');
     if (token.trim() !== '') updateAmount(token, amount);
+
+    // disableButtons();
   };
+
+  // const disableButtons = () => {
+  //   const numBuy = new BigNumber(amountTransactionBuy, 10);
+  //   const numSell = new BigNumber(amountTransactionSell, 10);
+  //   const poolEgld = new BigNumber(amountAvailablePoolEgld, 10);
+  //   const poolToken = new BigNumber(amountAvailablePoolToken, 10);
+  //   if (numBuy.gte(poolToken)) {
+  //     setDisabledBuy(true);
+  //   }
+  //   if (numSell.gte(poolEgld)) {
+  //     setDisabledSell(true);
+  //   }
+  // };
 
   return (
     <>
@@ -364,6 +371,7 @@ const FormTrade = () => {
             type='number'
             name='amount'
             min='0'
+            maxLength={maxNum}
             step='0.0001'
             onChange={handleInputChange}
             required
@@ -377,7 +385,7 @@ const FormTrade = () => {
                   <span className='text-secondary'>{referenceToken}</span>{' '}
                   you&apos;ll get{' '}
                   <DappUI.Denominate
-                    value={amountTransactionSell}
+                    value={amountTransactionBuy}
                     token={tradeData.pair.split('-')[0]}
                   />
                 </p>
@@ -389,7 +397,7 @@ const FormTrade = () => {
                   </span>{' '}
                   you&apos;ll get{' '}
                   <DappUI.Denominate
-                    value={amountTransactionBuy}
+                    value={amountTransactionSell}
                     token='xEGLD'
                   />
                 </p>

@@ -20,7 +20,6 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
 
   provider.isOwnerSC(contractAddress, address).then((answer) => {
     setIsOwner(answer);
-    console.log('respuesta de isOwnerSC', answer);
   });
 
   return (

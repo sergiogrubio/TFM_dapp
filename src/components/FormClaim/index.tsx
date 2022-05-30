@@ -158,6 +158,11 @@ const FormClaim = () => {
     });
     const token = event.target.value.trim();
 
+    setAmountEgld('');
+    setAmountToken('');
+    setAmountEarnEgld('');
+    setAmountEarnToken('');
+
     if (token !== '') {
       // problem: now claimData.pair is the value before
       // and event.target.value the new value
@@ -167,22 +172,18 @@ const FormClaim = () => {
       updateAmountToken(event.target.value);
       updateEarningsToken(event.target.value);
       updateEarningsEgld();
-    } else {
-      setAmountEgld('');
-      setAmountToken('');
-      setAmountEarnEgld('');
-      setAmountEarnToken('');
     }
   };
 
   const handleSubmit = (event: any) => {
     event.preventDefault();
     const btn = document.activeElement;
-    console.log(
-      '%cindex.tsx line:181 object',
-      'color: #007acc;',
-      btn?.textContent
-    );
+
+    setAmountEgld('');
+    setAmountToken('');
+    setAmountEarnEgld('');
+    setAmountEarnToken('');
+
     switch (btn?.textContent?.trim()) {
       case 'Claim earnings': {
         claimEarnings();

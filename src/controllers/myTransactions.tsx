@@ -25,7 +25,7 @@ export class CustomNetworkProvider extends ApiNetworkProvider {
 
 export const getProvider = () => {
   return new CustomNetworkProvider(providerAddress, {
-    timeout: 5000
+    timeout: 10000
   });
 };
 

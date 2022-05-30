@@ -27,7 +27,7 @@ const Navbar = (props: NavBarProps) => {
   };
 
   const isLoggedIn = Boolean(address);
-  console.log('bedore BSNavbar', isOwner);
+
   return (
     <BsNavbar className='bg-white border-bottom px-4 py-3'>
       <div className='container-fluid'>
