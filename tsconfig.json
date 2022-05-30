@@ -18,5 +18,5 @@
     "baseUrl": "src"
   },
   "include": ["src"],
-  "typeRoots": ["../node_modules/@types", "../@types"]
+  "typeRoots": ["./node_modules/@types", "./@types"]
 }
