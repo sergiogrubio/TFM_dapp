@@ -1,0 +1,22 @@
+{
+  "files": {
+    "main.css": "/TFM_dapp/static/css/main.7965d61f.chunk.css",
+    "main.js": "/TFM_dapp/static/js/main.04493eeb.chunk.js",
+    "main.js.map": "/TFM_dapp/static/js/main.04493eeb.chunk.js.map",
+    "runtime-main.js": "/TFM_dapp/static/js/runtime-main.4c340bc1.js",
+    "runtime-main.js.map": "/TFM_dapp/static/js/runtime-main.4c340bc1.js.map",
+    "static/js/2.daafe87c.chunk.js": "/TFM_dapp/static/js/2.daafe87c.chunk.js",
+    "static/js/2.daafe87c.chunk.js.map": "/TFM_dapp/static/js/2.daafe87c.chunk.js.map",
+    "index.html": "/TFM_dapp/index.html",
+    "static/css/main.7965d61f.chunk.css.map": "/TFM_dapp/static/css/main.7965d61f.chunk.css.map",
+    "static/js/2.daafe87c.chunk.js.LICENSE.txt": "/TFM_dapp/static/js/2.daafe87c.chunk.js.LICENSE.txt",
+    "static/media/elrond.d914d58e.svg": "/TFM_dapp/static/media/elrond.d914d58e.svg",
+    "static/media/heart.8edd3f99.svg": "/TFM_dapp/static/media/heart.8edd3f99.svg"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.4c340bc1.js",
+    "static/js/2.daafe87c.chunk.js",
+    "static/css/main.7965d61f.chunk.css",
+    "static/js/main.04493eeb.chunk.js"
+  ]
+}
