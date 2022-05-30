@@ -119,7 +119,7 @@ const FormClaim = () => {
       updateEarningsToken('');
       updateEarningsEgld();
     } else {
-      console.log('Error in claimEarnings sessionId = null');
+      // console.log('Error in claimEarnings sessionId = null');
     }
   };
 
@@ -146,7 +146,7 @@ const FormClaim = () => {
       updateAmountEgld(''); // setAmountEgld('0');
       updateAmountToken(''); // setAmountToken('0');
     } else {
-      console.log('claimPool error sessionId = null');
+      // console.log('claimPool error sessionId = null');
     }
   };
 
@@ -194,7 +194,7 @@ const FormClaim = () => {
         break;
       }
       default: {
-        console.log('something went wrong');
+        // console.log('something went wrong');
         break;
       }
     }

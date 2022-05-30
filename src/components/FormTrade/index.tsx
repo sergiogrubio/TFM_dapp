@@ -239,7 +239,7 @@ const FormTrade = () => {
     if (sessionId != null) {
       setTransactionSessionId(sessionId);
     } else {
-      console.log('swapEgldForToken error sessionId = null');
+      // console.log('swapEgldForToken error sessionId = null');
     }
   };
 
@@ -260,7 +260,7 @@ const FormTrade = () => {
     if (sessionId != null) {
       setTransactionSessionId(sessionId);
     } else {
-      console.log('swapTokenForEgld error sessionId = null');
+      // console.log('swapTokenForEgld error sessionId = null');
     }
   };
 
