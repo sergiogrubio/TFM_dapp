@@ -161,7 +161,7 @@ const FormTrade = () => {
         i.name = i.name + '-xEGLD';
       });
       // idea for sorting:
-      // https://stackoverflow.com/questions/1129216/sort-array-of-objects-by-string-property-value
+      // 'https://stackoverflow.com/questions/1129216/sort-array-of-objects-by-string-property-value
       tokens = tokens.sort((a: any, b: any) =>
         a.name > b.name ? 1 : b.name > a.name ? -1 : 0
       );
