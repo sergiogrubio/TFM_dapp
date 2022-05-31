@@ -14,6 +14,7 @@ I am convinced that everything may be improved a lot. I like blockchain, so in t
 
 - Node.js version 12.16.2+
 - Npm version 6.14.4+
+- Yarn version 1.22.18+
 
 ## Getting Started
 
