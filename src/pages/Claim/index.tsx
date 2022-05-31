@@ -2,7 +2,11 @@ import * as React from 'react';
 
 import FormClaim from '../../components/FormClaim';
 import Transactions from '../../components/Transactions';
-const filterFuncs = ['claimLiquidityToken', 'claimLiquidityEgld'];
+const filterFuncs = [
+  'claimLiquidityToken',
+  'claimLiquidityEgld',
+  'claimEarnings'
+];
 
 const Claim = () => {
   return (
