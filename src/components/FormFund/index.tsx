@@ -212,7 +212,7 @@ const FormFund = () => {
         </div>
         <div className='form-group row'>
           <label htmlFor='amountEgld' className='text-light'>
-            Amount EGLD:
+            Amount xEGLD:
           </label>
           <input
             className='form-control'
